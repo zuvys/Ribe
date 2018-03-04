@@ -13,18 +13,18 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            var serviceProxy = new ServiceProxyFacotry(
+            var factory = new ServiceProxyFacotry(
                 new JsonSerializer(),
                 new JsonMessageFactory()
                 );
 
-            var proxy = serviceProxy.CreateProxy<IShopService>(
-                () => new ServiceProxyOption().WithVersion("0.0.2")
-            );
+            var proxy = factory.CreateProxy<IShopService>(
+                () => new ServiceProxyOption().WithVersion("0.0.2"));
 
             Console.WriteLine("Begin");
 
             var goods = proxy.GetGoods(2);
+
             Console.WriteLine("Sync Invoke GoodsName:" + goods.Name);
 
             var awaiter = proxy.GetGoodsAsync(2).GetAwaiter();
@@ -34,7 +34,7 @@ namespace Client
                 var goods2 = awaiter.GetResult();
                 Console.WriteLine("Async Invoke GoodsName:" + goods2.Name);
             });
-
+       
             Console.WriteLine("End");
             Console.ReadLine();
         }

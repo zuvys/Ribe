@@ -38,7 +38,11 @@ namespace ServiceInterface
 
         public Task<GoodsDto> GetGoodsAsync(int id)
         {
-            return Task.FromResult(GetGoods(id));
+            return Task.Run<GoodsDto>(() =>
+            {
+                System.Threading.Thread.Sleep(2000);
+                return GetGoods(id);
+            });
         }
     }
 }

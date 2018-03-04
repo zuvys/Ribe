@@ -87,17 +87,19 @@ namespace Ribe.Core.Executor.Internals
 
         private static Func<object, Object[], Task<object>> CreateAsyncExecuteDelegate(Type serviceType, ServiceMethod serviceMethod)
         {
-            var serviceParamter = Expression.Parameter(typeof(object), "service");
-            var parametersParameter = Expression.Parameter(typeof(object[]), "parameters");
-
-            var parameters = new List<Expression>();
-            var parameterInfos = serviceMethod.Parameters;
+            var tcsType = typeof(TaskCompletionSource<object>);
             var returnType = serviceMethod.Method.ReturnType;
 
-            for (int i = 0; i < parameterInfos.Length; i++)
+            var tcsParamter = Expression.Parameter(tcsType, "tcs");
+            var serviceParamter = Expression.Parameter(typeof(object), "service");
+            var paramsParameter = Expression.Parameter(typeof(object[]), "parameters");
+
+            var parameters = new List<Expression>();
+
+            for (int i = 0; i < serviceMethod.Parameters.Length; i++)
             {
-                var item = parameterInfos[i];
-                var paramterValue = Expression.ArrayIndex(parametersParameter, Expression.Constant(i));
+                var item = serviceMethod.Parameters[i];
+                var paramterValue = Expression.ArrayIndex(paramsParameter, Expression.Constant(i));
                 var castedValue = Expression.Convert(paramterValue, item.ParameterType);
 
                 parameters.Add(castedValue);
@@ -108,29 +110,44 @@ namespace Ribe.Core.Executor.Internals
                     serviceMethod.Method,
                     parameters);
 
-            if (returnType == typeof(Task))
-            {
-                //Wrap return Task
-                var voidDelegate = Expression.Lambda(methodCall, serviceParamter, parametersParameter).Compile();
+            var isVoidMethod = returnType == typeof(Task);
+            var awaiterType = isVoidMethod
+                ? typeof(TaskAwaiter)
+                : typeof(TaskAwaiter<>).MakeGenericType(returnType.GetGenericArguments().FirstOrDefault());
 
-                return (obj, paramterValues) =>
-                {
-                    ((Action<object, object[]>)voidDelegate)(obj, paramterValues);
-                    return Task.FromResult<object>(null);
-                };
-            }
+            var awaiterVar = Expression.Variable(awaiterType, "awaiter");
 
-            var valueType = returnType.GetGenericArguments().FirstOrDefault();
-            var awaiterType = typeof(TaskAwaiter<>).MakeGenericType(valueType);
+            var lambdaBody = Expression.Block(
+                new[] { awaiterVar },
+                Expression.Assign(
+                    awaiterVar,
+                    Expression.Call(methodCall, returnType.GetMethod("GetAwaiter"))
+                ),
+                Expression.Call(
+                    awaiterVar,
+                    awaiterType.GetMethod("OnCompleted"),
+                    Expression.Lambda<Action>(
+                        Expression.Call(
+                            tcsParamter,
+                            tcsType.GetMethod("SetResult"),
+                            isVoidMethod
+                                ? (Expression)Expression.Constant(null)
+                                : Expression.Call(awaiterVar, awaiterType.GetMethod("GetResult"))
+                        )
+                    )
+                ),
+                Expression.Label(Expression.Label()));
 
-            var getAwaiter = Expression.Call(methodCall, returnType.GetMethod("GetAwaiter"));
-            var getResult = Expression.Call(getAwaiter, awaiterType.GetMethod("GetResult"));
-
-            var objectDelegate = Expression.Lambda(getResult, serviceParamter, parametersParameter).Compile();
+            var lambda = Expression.Lambda(lambdaBody, serviceParamter, paramsParameter, tcsParamter);
+            var executor = (Action<object, object[], TaskCompletionSource<object>>)lambda.Compile();
 
             return (obj, paramterValues) =>
             {
-                return Task<object>.FromResult(((Func<object, object[], object>)objectDelegate)(obj, paramterValues));
+                var tcs = new TaskCompletionSource<object>();
+
+                executor(obj, paramterValues, tcs);
+
+                return tcs.Task;
             };
         }
     }
