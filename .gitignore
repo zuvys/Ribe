@@ -3,3 +3,25 @@
 ################################################################################
 
 /src/.vs/Ribe/v15
+/src/Client/bin/Debug/netcoreapp2.0
+/.vs
+/samples/Client/bin/Debug/netcoreapp2.0
+/samples/Client/obj
+/samples/Server/bin/Debug/netcoreapp2.0
+/samples/Server/obj
+/samples/ServiceInterfaces/bin/Debug/netcoreapp2.0
+/samples/ServiceInterfaces/obj
+/src/Ribe/.vs/Ribe/v15
+/src/Ribe/bin/Debug/netcoreapp2.0
+/src/Ribe/obj/Debug/netcoreapp2.0
+/src/Ribe/obj/Release/netcoreapp2.0
+/src/Ribe/obj
+/src/Ribe.Client/bin/Debug/netcoreapp2.0
+/src/Ribe.Client/obj/Debug/netcoreapp2.0
+/src/Ribe.Client/obj/Release/netcoreapp2.0
+/src/Ribe.Client/obj
+/src/Ribe.DotNetty/bin/Debug/netcoreapp2.0
+/src/Ribe.DotNetty/obj
+/src/Ribe.Json/bin/Debug/netcoreapp2.0
+/src/Ribe.Json/obj
+/src/Ribe.Server/obj
