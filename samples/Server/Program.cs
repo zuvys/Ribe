@@ -26,6 +26,11 @@ namespace Client
                 cache.AddOrUpdate(item);
             }
 
+            foreach (var item in facotry.CreateServices(typeof(ShopServiceImpl2)))
+            {
+                cache.AddOrUpdate(item);
+            }
+
             new NettyServer(cache).StartAsync().Wait();
             Console.ReadLine();
         }

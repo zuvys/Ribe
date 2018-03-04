@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ribe
+﻿namespace Ribe
 {
     /// <summary>
     /// 常量定义
@@ -24,5 +20,9 @@ namespace Ribe
         public const string ServiceMethodKey = "Service_Method_Key";
 
         public const string IsInvocation = "Is_Invocation";
+
+        public const string DefaultGroup = "default";
+
+        public const string DefaultVersion = "0.0.1";
     }
 }

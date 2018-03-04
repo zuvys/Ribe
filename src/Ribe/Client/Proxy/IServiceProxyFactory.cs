@@ -1,7 +1,9 @@
-﻿namespace Ribe.Client.Proxy
+﻿using System;
+
+namespace Ribe.Client.Proxy
 {
     public interface IServiceProxyFactory
     {
-        TService CreateProxy<TService>();
+        TService CreateProxy<TService>(Func<ServiceProxyOption> optionBuilder);
     }
 }

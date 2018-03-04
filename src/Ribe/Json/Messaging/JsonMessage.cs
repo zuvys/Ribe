@@ -44,7 +44,7 @@ namespace Ribe.Json.Messaging
             var serializer = (JsonSerializer)Serializer;
             var entry = serializer.DeserializeObject<ServiceExecutionResult>(Body);
 
-            entry.Result = serializer.DeserializeObject(entry.Result.ToString(), dataType);
+            entry.Data = serializer.DeserializeObject(entry.Data.ToString(), dataType);
 
             return entry;
         }

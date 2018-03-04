@@ -48,7 +48,7 @@ namespace Ribe.DotNetty.Adapter
                 var serializer = message.Serializer;
                 var result = new ServiceExecutionResult
                 {
-                    Result = value,
+                    Data = value,
                     Error = string.Empty,
                     RequestId = ctx.RequestId,
                     Status = ServiceExecutionStatus.Success

@@ -5,7 +5,7 @@ using Ribe.DotNetty.Client;
 using Ribe.Messaging;
 using Ribe.Serialize;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -25,6 +25,8 @@ namespace Ribe.Client.Proxy
 
         internal static ModuleBuilder ModuleBuilder { get; }
 
+        private static ConcurrentDictionary<Type, Type> ServiceProxies { get; }
+
         private IServiceMethodKeyFactory _serviceMethodKeyFactory;
 
         private ISerializer _serializer;
@@ -35,6 +37,7 @@ namespace Ribe.Client.Proxy
         {
             AssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(AssemblyName), AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder = AssemblyBuilder.DefineDynamicModule(ModuleName);
+            ServiceProxies = new ConcurrentDictionary<Type, Type>();
         }
 
         public ServiceProxyFacotry(ISerializer serializer, IMessageFactory messageFactory)
@@ -46,108 +49,116 @@ namespace Ribe.Client.Proxy
             _serviceMethodKeyFactory = new DefaultServiceMethodKeyFactory(new LoggerFactory().CreateLogger("WWW"));
         }
 
-        public TService CreateProxy<TService>()
+        public TService CreateProxy<TService>(Func<ServiceProxyOption> builder = null)
         {
-            var serviceType = typeof(TService);
-            if (!serviceType.IsInterface)
+            var type = typeof(TService);
+            if (!type.IsInterface)
             {
-                throw new NotSupportedException($"type :{serviceType.FullName} is not an interface type");
+                throw new NotSupportedException($"type :{type.FullName} is not an interface type");
             }
 
-            var methods = serviceType.GetMethods();
-
-            var typeBudiler = ModuleBuilder.DefineType(
-                ProxyTypePrefix + "_" + serviceType.Namespace.Replace(".", "_") + "_" + serviceType.Name,
-                TypeAttributes.Class,
-                null,
-                new[] { serviceType });
-
-            var serializerBuilder = typeBudiler.DefineField("_serializer", typeof(ISerializer), FieldAttributes.Private);
-            var messageFacotryBuilder = typeBudiler.DefineField("_messageFacotry", typeof(IMessageFactory), FieldAttributes.Private);
-
-            var ctorBudiler = typeBudiler.DefineConstructor(
-                MethodAttributes.Public,
-                CallingConventions.HasThis,
-                new[] { typeof(ISerializer), typeof(IMessageFactory) });
-
-            var il = ctorBudiler.GetILGenerator();
-
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Stfld, serializerBuilder);
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldarg_2);
-            il.Emit(OpCodes.Stfld, messageFacotryBuilder);
-            il.Emit(OpCodes.Ret);
-
-            foreach (var item in methods)
+            var proxy = ServiceProxies.GetOrAdd(type, (serviceType) =>
             {
-                var paramterTypes = item.GetParameters().Select(i => i.ParameterType).ToArray();
-                var methodBudiler = typeBudiler.DefineMethod(
-                       item.Name,
-                       item.Attributes & (~MethodAttributes.Abstract),
-                       item.ReturnType,
-                       paramterTypes);
+                var typeBudiler = ModuleBuilder.DefineType(
+                    ProxyTypePrefix + "_" + serviceType.Namespace.Replace(".", "_") + "_" + serviceType.Name,
+                    TypeAttributes.Class,
+                    null,
+                    new[] { serviceType });
 
-                var path = "/default/" + serviceType.Namespace + "." + serviceType.Name + "/0.0.1/";
-                var methodKey = _serviceMethodKeyFactory.CreateMethodKey(item);
+                var serializerField = typeBudiler.DefineField("_serializer", typeof(ISerializer), FieldAttributes.Private);
+                var messageFacotryField = typeBudiler.DefineField("_messageFacotry", typeof(IMessageFactory), FieldAttributes.Private);
+                var optionsField = typeBudiler.DefineField("_options", typeof(ServiceProxyOption), FieldAttributes.Private);
+                var pathField = typeBudiler.DefineField("_path", typeof(string), FieldAttributes.Private);
 
-                il = methodBudiler.GetILGenerator();
+                var ctorBudiler = typeBudiler.DefineConstructor(
+                    MethodAttributes.Public,
+                    CallingConventions.HasThis,
+                    new[] { typeof(ISerializer), typeof(IMessageFactory), typeof(ServiceProxyOption), typeof(string) });
 
-                il.Emit(OpCodes.Ldstr, path);
-                il.Emit(OpCodes.Ldstr, methodKey);
-                il.Emit(OpCodes.Ldtoken, item.ReturnType);
+                var il = ctorBudiler.GetILGenerator();
+
                 il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldfld, serializerBuilder);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Stfld, serializerField);
                 il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldfld, messageFacotryBuilder);
-                il.Emit(OpCodes.Ldc_I4, item.GetParameters().Length);
-                il.Emit(OpCodes.Newarr, typeof(object));
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Stfld, messageFacotryField);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_3);
+                il.Emit(OpCodes.Stfld, optionsField);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg, 4);
+                il.Emit(OpCodes.Stfld, pathField);
+                il.Emit(OpCodes.Ret);
 
-                for (var i = 0; i < item.GetParameters().Length; i++)
+                foreach (var item in serviceType.GetMethods())
                 {
-                    il.Emit(OpCodes.Dup);
-                    il.Emit(OpCodes.Ldc_I4, i);
-                    il.Emit(OpCodes.Ldarg, i + 1);
+                    var paramterTypes = item.GetParameters().Select(i => i.ParameterType).ToArray();
+                    var methodBudiler = typeBudiler.DefineMethod(
+                           item.Name,
+                           item.Attributes & (~MethodAttributes.Abstract),
+                           item.ReturnType,
+                           paramterTypes);
 
-                    if (item.GetParameters()[i].ParameterType.IsValueType)
+                    var methodKey = _serviceMethodKeyFactory.CreateMethodKey(item);
+
+                    il = methodBudiler.GetILGenerator();
+
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, pathField);
+                    il.Emit(OpCodes.Ldstr, methodKey);
+                    il.Emit(OpCodes.Ldtoken, item.ReturnType);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, optionsField);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, serializerField);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, messageFacotryField);
+                    il.Emit(OpCodes.Ldc_I4, item.GetParameters().Length);
+                    il.Emit(OpCodes.Newarr, typeof(object));
+
+                    for (var i = 0; i < item.GetParameters().Length; i++)
                     {
-                        il.Emit(OpCodes.Box, item.GetParameters()[i].ParameterType);
+                        il.Emit(OpCodes.Dup);
+                        il.Emit(OpCodes.Ldc_I4, i);
+                        il.Emit(OpCodes.Ldarg, i + 1);
+
+                        if (item.GetParameters()[i].ParameterType.IsValueType)
+                        {
+                            il.Emit(OpCodes.Box, item.GetParameters()[i].ParameterType);
+                        }
+
+                        il.Emit(OpCodes.Stelem_Ref);
                     }
 
-                    il.Emit(OpCodes.Stelem_Ref);
+                    il.Emit(OpCodes.Call, typeof(ServiceProxyFacotry).GetMethod(nameof(InvokeAsync)));
+                    il.Emit(OpCodes.Ret);
                 }
 
-                il.Emit(OpCodes.Call, typeof(ServiceProxyFacotry).GetMethod(nameof(InvokeAsync)));
-                il.Emit(OpCodes.Ret);
-            }
+                return typeBudiler.CreateType();
+            });
+            var options = builder != null ? builder() : new ServiceProxyOption();
+            //TODO:Client Server 两端调用相同生成器
+            var path = $"/{ options[Constants.Group]}/{ type.Namespace + "." + type.Name}/{options[Constants.Version]}/";
 
-            return (TService)Activator.CreateInstance(typeBudiler.CreateType(), _serializer, _messageFactory);
-        }
-
-        public static object InvokeAsync2(
-          object[] paramterValues)
-        {
-            return paramterValues.Length;
+            return (TService)Activator.CreateInstance(proxy, _serializer, _messageFactory, options, path);
         }
 
         public static object InvokeAsync(
             string path,
             string methodKey,
-            Type resultValueType,
+            Type returnType,
+            ServiceProxyOption options,
             ISerializer serializer,
             IMessageFactory messageFactory,
             object[] paramterValues)
         {
-            var headers = new Dictionary<string, string>()
-            {
-                [Constants.RequestId] = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds.ToString(),
-                [Constants.ServicePath] = path,
-                [Constants.ServiceMethodKey] = methodKey
-            };
+            options[Constants.RequestId] = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds.ToString();
+            options[Constants.ServicePath] = path;
+            options[Constants.ServiceMethodKey] = methodKey;
 
             var body = serializer.SerializeObject(paramterValues);
-            var message = messageFactory.Create(headers, body);
+            var message = messageFactory.Create(options, body);
 
             var client = new NettyClient();
 
@@ -157,14 +168,17 @@ namespace Ribe.Client.Proxy
                 Port = 8080
             }).Wait();
 
-            var dto = client.InvokeAsync(message).Result.GetResult(resultValueType);
-
-            if (!string.IsNullOrWhiteSpace(dto.Error))
+            if (typeof(Task).IsAssignableFrom(returnType))
             {
-                throw new Exception(dto.Error);
+                if (typeof(Task) == returnType)
+                {
+                    return Task.CompletedTask;
+                }
+
+                return Task.FromResult(client.InvokeAsync(message).Result.GetResult(returnType.GetGenericArguments()[0]).Data);
             }
 
-            return dto.Result;
+            return client.InvokeAsync(message).Result.GetResult(returnType).Data;
         }
     }
 }
