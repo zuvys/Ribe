@@ -106,37 +106,46 @@ namespace Ribe.Core.Executor.Internals
             }
 
             var methodCall = Expression.Call(
-                    Expression.Convert(serviceParamter, serviceType),
-                    serviceMethod.Method,
-                    parameters);
+                  Expression.Convert(serviceParamter, serviceType),
+                  serviceMethod.Method,
+                  parameters);
 
             var isVoidMethod = returnType == typeof(Task);
             var awaiterType = isVoidMethod
                 ? typeof(TaskAwaiter)
                 : typeof(TaskAwaiter<>).MakeGenericType(returnType.GetGenericArguments().FirstOrDefault());
 
-            var awaiterVar = Expression.Variable(awaiterType, "awaiter");
+            var task = Expression.Variable(returnType, "task");
+            var awaiter = Expression.Variable(awaiterType, "awaiter");
+            var getAwaiter = Expression.Call(task, returnType.GetMethod("GetAwaiter"));
 
             var lambdaBody = Expression.Block(
-                new[] { awaiterVar },
-                Expression.Assign(
-                    awaiterVar,
-                    Expression.Call(methodCall, returnType.GetMethod("GetAwaiter"))
-                ),
+                new[] { task, awaiter },
+                Expression.Assign(task, methodCall),
+                Expression.Assign(awaiter, getAwaiter),
                 Expression.Call(
-                    awaiterVar,
+                    awaiter,
                     awaiterType.GetMethod("OnCompleted"),
                     Expression.Lambda<Action>(
-                        Expression.Call(
-                            tcsParamter,
-                            tcsType.GetMethod("SetResult"),
-                            isVoidMethod
-                                ? (Expression)Expression.Constant(null)
-                                : Expression.Call(awaiterVar, awaiterType.GetMethod("GetResult"))
+                         Expression.IfThenElse(
+                            Expression.NotEqual(Expression.MakeMemberAccess(task, returnType.GetProperty("Exception")), Expression.Constant(null)),
+                            Expression.Call(
+                                tcsParamter,
+                                tcsType.GetMethod("SetResult"),
+                                Expression.MakeMemberAccess(task, returnType.GetProperty("Exception"))
+                            ),
+                            Expression.Call(
+                                tcsParamter,
+                                tcsType.GetMethod("SetResult"),
+                                isVoidMethod
+                                    ? (Expression)Expression.Constant(null)
+                                    : Expression.Call(awaiter, awaiterType.GetMethod("GetResult"))
+                            )
                         )
                     )
                 ),
-                Expression.Label(Expression.Label()));
+                Expression.Label(Expression.Label())
+            );
 
             var lambda = Expression.Lambda(lambdaBody, serviceParamter, paramsParameter, tcsParamter);
             var executor = (Action<object, object[], TaskCompletionSource<object>>)lambda.Compile();

@@ -1,6 +1,6 @@
 ﻿using Ribe.Client;
 using Ribe.Client.Extensions;
-using Ribe.Client.Proxy;
+using Ribe.Client.ServiceProxy;
 using Ribe.Json.Messaging;
 using Ribe.Json.Serialize;
 using ServiceInterfaces;
@@ -13,13 +13,13 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            var factory = new ServiceProxyFacotry(
+            var factory = new DefaultServiceProxyFactory(
                 new JsonSerializer(),
                 new JsonMessageFactory()
                 );
 
             var proxy = factory.CreateProxy<IShopService>(
-                () => new ServiceProxyOption().WithVersion("0.0.2"));
+                () => new RpcServiceProxyOption().WithVersion("0.0.2"));
 
             Console.WriteLine("Begin");
 
