@@ -7,9 +7,12 @@ using Ribe.Client;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
 using Ribe.Json.Codecs;
+using Ribe.Messaging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Client
 {
@@ -19,11 +22,11 @@ namespace Ribe.DotNetty.Client
 
         private IEventLoopGroup _group;
 
-        private InvocationCompletionSource _completionSource;
+        private ConcurrentDictionary<string, TaskCompletionSource<IMessage>> _map;
 
         public RpcClientFactory()
         {
-            _completionSource = new InvocationCompletionSource();
+            _map = new ConcurrentDictionary<string, TaskCompletionSource<IMessage>>();
             _group = new MultithreadEventLoopGroup();
             _bootstrap = new Bootstrap()
                 .Group(_group)
@@ -55,7 +58,10 @@ namespace Ribe.DotNetty.Client
                             throw new Exception($"Result Headers not constains {Constants.RequestId} key");
                         }
 
-                        _completionSource.SetResult(id, message);
+                        if (_map.TryRemove(id, out var tcs))
+                        {
+                            tcs.SetResult(message);
+                        }
                     }));
                 }));
         }
@@ -68,7 +74,7 @@ namespace Ribe.DotNetty.Client
             return new RpcClient(
                 () => channel.CloseAsync(),
                 (m) => channel.WriteAndFlushAsync(m),
-                (id) => _completionSource.GetResult(id)
+                (id) => _map.GetOrAdd(id, (k) => new TaskCompletionSource<IMessage>()).Task
             );
         }
 

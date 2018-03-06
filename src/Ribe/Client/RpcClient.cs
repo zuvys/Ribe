@@ -1,5 +1,4 @@
-﻿using Ribe.DotNetty.Client;
-using Ribe.Messaging;
+﻿using Ribe.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,8 +16,7 @@ namespace Ribe.Client
         public RpcClient(
             Action close,
             Func<IMessage, Task> sendMessage,
-            Func<string, Task<IMessage>> getResult
-        )
+            Func<string, Task<IMessage>> getResult)
         {
             Close = close;
             GetResult = getResult;
@@ -30,7 +28,7 @@ namespace Ribe.Client
             var id = message.Headers.GetValueOrDefault(Constants.RequestId);
             if (id == null)
             {
-                throw new Exception("request id is null!");
+                throw new RpcException("request id is empty!");
             }
 
             if (SendMessage != null)

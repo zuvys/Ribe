@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Ribe.Client.Invoker;
 using Ribe.Core.Service;
 using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Client;
@@ -28,9 +29,7 @@ namespace Ribe.Client.ServiceProxy
 
         private IServiceMethodKeyFactory _serviceMethodKeyFactory;
 
-        private ISerializer _serializer;
-
-        private IMessageFactory _messageFactory;
+        private IServiceInvokerProvider _serviceInvokerProvider;
 
         static DefaultServiceProxyFactory()
         {
@@ -39,11 +38,18 @@ namespace Ribe.Client.ServiceProxy
             ServiceProxies = new ConcurrentDictionary<Type, Type>();
         }
 
-        public DefaultServiceProxyFactory(ISerializer serializer, IMessageFactory messageFactory)
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="serviceInvokerProvider"></param>
+        /// <param name="serviceMethodKeyFactory"></param>
+        public DefaultServiceProxyFactory(
+            IServiceInvokerProvider serviceInvokerProvider,
+            IServiceMethodKeyFactory serviceMethodKeyFactory
+        )
         {
-            _serializer = serializer;
-            _messageFactory = messageFactory;
-            _serviceMethodKeyFactory = new DefaultServiceMethodKeyFactory(new LoggerFactory().CreateLogger("WWW"));
+            _serviceInvokerProvider = serviceInvokerProvider;
+            _serviceMethodKeyFactory = serviceMethodKeyFactory;
         }
 
         public TService CreateProxy<TService>(Func<RpcServiceProxyOption> builder = null)
@@ -62,7 +68,7 @@ namespace Ribe.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(ISerializer), typeof(IMessageFactory), typeof(RpcServiceProxyOption) };
+                var ctorTypes = new[] { typeof(IServiceInvokerProvider), typeof(RpcServiceProxyOption) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,
@@ -73,41 +79,40 @@ namespace Ribe.Client.ServiceProxy
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldarg_1);
                 il.Emit(OpCodes.Ldarg_2);
-                il.Emit(OpCodes.Ldarg_3);
                 il.Emit(OpCodes.Call, typeof(ServiceProxyBase).GetConstructor(ctorTypes));
                 il.Emit(OpCodes.Ret);
 
                 foreach (var item in serviceType.GetMethods())
                 {
-                    var paramterTypes = item.GetParameters().Select(i => i.ParameterType).ToArray();
+                    var serviceMethodKey = _serviceMethodKeyFactory.CreateMethodKey(item);
+                    var paramterInfos = item.GetParameters();
+                    var paramterTypes = paramterInfos.Select(i => i.ParameterType).ToArray();
                     var methodBudiler = typeBudiler.DefineMethod(
                            item.Name,
                            item.Attributes & (~MethodAttributes.Abstract),
                            item.ReturnType,
                            paramterTypes);
 
-                    var methodKey = _serviceMethodKeyFactory.CreateMethodKey(item);
 
                     il = methodBudiler.GetILGenerator();
 
                     il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldstr, methodKey);
+                    il.Emit(OpCodes.Ldstr, serviceMethodKey);
                     il.Emit(OpCodes.Ldtoken, item.ReturnType);
-                    il.Emit(OpCodes.Ldc_I4, item.GetParameters().Length);
+                    il.Emit(OpCodes.Ldc_I4, paramterTypes.Length);
                     il.Emit(OpCodes.Newarr, typeof(object));
 
-                    for (var i = 0; i < item.GetParameters().Length; i++)
+                    for (var i = 0; i < paramterInfos.Length; i++)
                     {
                         il.Emit(OpCodes.Dup);
                         il.Emit(OpCodes.Ldc_I4, i);
                         il.Emit(OpCodes.Ldarg, i + 1);
 
-                        if (item.GetParameters()[i].ParameterType.IsValueType)
+                        if (paramterInfos[i].ParameterType.IsValueType)
                         {
-                            il.Emit(OpCodes.Box, item.GetParameters()[i].ParameterType);
+                            il.Emit(OpCodes.Box, paramterInfos[i].ParameterType);
+                            il.Emit(OpCodes.Stelem_Ref);
                         }
-
-                        il.Emit(OpCodes.Stelem_Ref);
                     }
 
                     il.Emit(OpCodes.Call, ServiceProxyBase.InvokeMethod);
@@ -119,8 +124,9 @@ namespace Ribe.Client.ServiceProxy
 
             var options = builder != null ? builder() : new RpcServiceProxyOption();
 
+            //TODO:ServicePath在服务端生成
             options[Constants.ServicePath] = $"/{ options[Constants.Group]}/{ type.Namespace + "." + type.Name}/{options[Constants.Version]}/";
-            return (TService)Activator.CreateInstance(proxy, _serializer, _messageFactory, options);
+            return (TService)Activator.CreateInstance(proxy, _serviceInvokerProvider, options);
         }
     }
 }

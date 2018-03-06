@@ -28,12 +28,7 @@ namespace Ribe.Core.Executor
             var methodExecutor = _objectMethodExecutorProvider.GetExecutor(context);
             var service = _serviceActivator.Create(context.ServiceType);
 
-            if (context.ServiceMethod.IsAsyncMethod)
-            {
-                return methodExecutor.ExecuteAsync(service, context.ParamterValues);
-            }
-
-            return Task.FromResult(methodExecutor.Execute(service, context.ParamterValues));
+            return methodExecutor.ExecuteAsync(service, context.ParamterValues);
         }
     }
 }

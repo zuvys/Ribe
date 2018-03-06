@@ -10,9 +10,7 @@ namespace Ribe.Core.Executor.Internals
 {
     public class ObjectMethodExecutor : IObjectMethodExecutor
     {
-        protected Func<object, object[], object> MethodExecutor { get; }
-
-        protected Func<object, object[], Task<object>> AsyncMethodExecutor { get; }
+        protected Func<object, object[], Task<object>> MethodExecutor { get; }
 
         public Type ServiceType { get; }
 
@@ -23,27 +21,17 @@ namespace Ribe.Core.Executor.Internals
             ServiceType = serviceType;
             ServiceMethod = serviceMethod;
 
-            if (serviceMethod.IsAsyncMethod)
-            {
-                AsyncMethodExecutor = CreateAsyncExecuteDelegate(serviceType, serviceMethod);
-            }
-            else
-            {
-                MethodExecutor = CreateExecuteDelegate(serviceType, serviceMethod);
-            }
-        }
-
-        public object Execute(object instance, object[] paramterValues)
-        {
-            return MethodExecutor(instance, paramterValues);
+            MethodExecutor = serviceMethod.IsAsyncMethod
+                ? CreateAsyncExecutor(serviceType, serviceMethod)
+                : CreateAsyncExecutorWrapper(serviceType, serviceMethod);
         }
 
         public Task<object> ExecuteAsync(object instance, object[] paramterValues)
         {
-            return AsyncMethodExecutor(instance, paramterValues);
+            return MethodExecutor(instance, paramterValues);
         }
 
-        private static Func<object, object[], object> CreateExecuteDelegate(Type serviceType, ServiceMethod serviceMethod)
+        private static Func<object, object[], Task<object>> CreateAsyncExecutorWrapper(Type serviceType, ServiceMethod serviceMethod)
         {
             var serviceParamter = Expression.Parameter(typeof(object), "service");
             var parametersParameter = Expression.Parameter(typeof(object[]), "parameters");
@@ -70,22 +58,31 @@ namespace Ribe.Core.Executor.Internals
                 returnType == typeof(void) ? typeof(void) : typeof(object)
             );
 
-            var createdDelegate = Expression.Lambda(methodCall, serviceParamter, parametersParameter).Compile();
-
-            if (returnType != typeof(void))
-            {
-                return (Func<object, object[], object>)createdDelegate;
-            }
+            var executor = Expression.Lambda(methodCall, serviceParamter, parametersParameter).Compile();
 
             //Wrap return void
-            return (obj, paramterValues) =>
+            return (instance, paramterValues) =>
             {
-                ((Action<object, object[]>)createdDelegate)(obj, paramterValues);
-                return null;
+                try
+                {
+                    if (returnType != typeof(void))
+                    {
+                        return Task.FromResult(((Func<object, object[], object>)executor)(instance, paramterValues));
+                    }
+                    else
+                    {
+                        ((Action<object, object[]>)executor)(instance, paramterValues);
+                        return Task.FromResult<object>(null);
+                    }
+                }
+                catch (Exception e)
+                {
+                    return Task.FromResult<object>(e);
+                }
             };
         }
 
-        private static Func<object, Object[], Task<object>> CreateAsyncExecuteDelegate(Type serviceType, ServiceMethod serviceMethod)
+        private static Func<object, object[], Task<object>> CreateAsyncExecutor(Type serviceType, ServiceMethod serviceMethod)
         {
             var tcsType = typeof(TaskCompletionSource<object>);
             var returnType = serviceMethod.Method.ReturnType;
@@ -118,6 +115,7 @@ namespace Ribe.Core.Executor.Internals
             var task = Expression.Variable(returnType, "task");
             var awaiter = Expression.Variable(awaiterType, "awaiter");
             var getAwaiter = Expression.Call(task, returnType.GetMethod("GetAwaiter"));
+            var getException = Expression.MakeMemberAccess(task, returnType.GetProperty("Exception"));
 
             var lambdaBody = Expression.Block(
                 new[] { task, awaiter },
@@ -128,11 +126,11 @@ namespace Ribe.Core.Executor.Internals
                     awaiterType.GetMethod("OnCompleted"),
                     Expression.Lambda<Action>(
                          Expression.IfThenElse(
-                            Expression.NotEqual(Expression.MakeMemberAccess(task, returnType.GetProperty("Exception")), Expression.Constant(null)),
+                            Expression.NotEqual(getException, Expression.Constant(null)),
                             Expression.Call(
                                 tcsParamter,
                                 tcsType.GetMethod("SetResult"),
-                                Expression.MakeMemberAccess(task, returnType.GetProperty("Exception"))
+                                getException
                             ),
                             Expression.Call(
                                 tcsParamter,
