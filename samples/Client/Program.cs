@@ -5,6 +5,7 @@ using Ribe.Client.Invoker.Internals;
 using Ribe.Client.ServiceProxy;
 using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Client;
+using Ribe.Infrustructure;
 using Ribe.Json.Messaging;
 using Ribe.Json.Serialize;
 using ServiceInterfaces;
@@ -18,7 +19,7 @@ namespace Client
         static void Main(string[] args)
         {
             var serializer = new JsonSerializer();
-            var messageFactory = new JsonMessageFactory();
+            var messageFactory = new JsonMessageFactory(serializer);
             var clientFacotry = new RpcClientFactory();
 
             var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(
@@ -26,7 +27,7 @@ namespace Client
             );
 
             var serviceInvokerProvider = new DefaultServiceInvokerProvider(
-                serializer,
+                new SnowflakeIdGenerator(1),
                 messageFactory,
                 clientFacotry
             );

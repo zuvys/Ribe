@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Ribe.Core
 {
-    public class ServiceInvocationContext
+    public class InvokeContext
     {
         public IMessage Message { get; }
 
@@ -17,7 +17,7 @@ namespace Ribe.Core
 
         public string ServiceMethodKey => Message.Headers.GetValueOrDefault(Constants.ServiceMethodKey);
 
-        public ServiceInvocationContext(IMessage message, Func<Type[], byte[], object[]> paramtersValueConvertor)
+        public InvokeContext(IMessage message, Func<Type[], byte[], object[]> paramtersValueConvertor)
         {
             Message = message;
             ParamterValuesConvertor = paramtersValueConvertor;

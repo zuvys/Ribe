@@ -26,11 +26,10 @@ namespace Ribe.Client.ServiceProxy
             var invoker = ServiceInvokerProvider.GetInvoker();
             if (invoker == null)
             {
-                //log
-                throw new RpcException("can not get an IServiceInvoker!");
+                throw new RpcException("get an IServiceInvoker failed!");
             }
 
-            return invoker.InvokeAsync(valueType, paramterValues, options);
+            return invoker.InvokeAsync(valueType, paramterValues, options).Result;
         }
     }
 }

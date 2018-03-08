@@ -1,4 +1,5 @@
 ﻿using Ribe.Core.Service.Address;
+using Ribe.Infrustructure;
 using Ribe.Messaging;
 using Ribe.Serialize;
 using System;
@@ -8,62 +9,81 @@ namespace Ribe.Client.Invoker.Internals
 {
     public class DefaultServiceInvoker : IServiceInvoker
     {
-        private ISerializer _serializer;
-
         private IMessageFactory _messageFactory;
 
         private IRpcClientFacotry _clientFacotry;
 
+        private IIdGenerator _idGenerator;
+
+        public ServiceAddress ServiceAddress { get; internal set; }
+
         public DefaultServiceInvoker(
-            ISerializer serializer,
+            IIdGenerator idGenerator,
             IMessageFactory messageFactory,
             IRpcClientFacotry clientFacotry
         )
         {
-            _serializer = serializer;
+            _idGenerator = idGenerator;
             _messageFactory = messageFactory;
             _clientFacotry = clientFacotry;
         }
 
-        public object InvokeAsync( Type valueType, object[] paramterValues,RpcServiceProxyOption options)
+        public async Task<object> InvokeAsync(Type valueType, object[] paramterValues, RpcServiceProxyOption options)
         {
-            var paramterValueBytes = _serializer.SerializeObject(paramterValues);
-            var invokeMessage = _messageFactory.Create(options, paramterValueBytes);
+            var isAsyncCall = IsAsyncCall(valueType);
+            var isVoidCall = IsVoidCall(valueType);
+            var dataType = isAsyncCall && !isVoidCall ? valueType.GetGenericArguments()[0] : valueType;
 
-            options[Constants.RequestId] = DateTime.Now.Millisecond.ToString();
+            EnsureRequestId(options);
 
-            //TODO:Hard coded for run
-            var client = _clientFacotry.CreateClient(new ServiceAddress()
+            var message = _messageFactory.Create(options, paramterValues);
+            if (message == null)
             {
-                Ip = "127.0.0.1",
-                Port = 8080
-            });
-
-            if (typeof(Task).IsAssignableFrom(valueType))
-            {
-                if (typeof(Task) == valueType)
-                {
-                    return Task.FromResult<object>(null);
-                }
-
-                var result = client.InvokeAsync(invokeMessage).Result.GetResult(valueType.GetGenericArguments()[0]);
-                if (!string.IsNullOrEmpty(result.Error))
-                {
-                    throw new Exception(result.Error);
-                }
-
-                return Task.FromResult(result.Data);
+                throw new RpcException("create invoke message failed!", options[Constants.RequestId]);
             }
-            else
-            {
-                var result = client.InvokeAsync(invokeMessage).Result.GetResult(valueType);
-                if (!string.IsNullOrEmpty(result.Error))
-                {
-                    throw new Exception(result.Error);
-                }
 
+            var client = _clientFacotry.CreateClient(ServiceAddress);
+            var returnMessage = await client.InvokeAsync(message);
+            if (returnMessage == null)
+            {
+                throw new RpcException("return message is null!", options[Constants.RequestId]);
+            }
+
+            var result = returnMessage.GetResult(dataType);
+            if (result == null)
+            {
+                throw new RpcException("return value is null", options[Constants.RequestId]);
+            }
+
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                throw new RpcException(result.Error, options[Constants.RequestId]);
+            }
+
+            if (!isAsyncCall)
+            {
                 return result.Data;
             }
+
+            return Task.FromResult(result.Data);
+        }
+
+        private void EnsureRequestId(RpcServiceProxyOption options)
+        {
+            if (!options.ContainsKey(Constants.RequestId))
+            {
+                options[Constants.RequestId] = _idGenerator.CreateId().ToString();
+            }
+        }
+
+        private static bool IsAsyncCall(Type valueType)
+        {
+            return typeof(Task).IsAssignableFrom(valueType);
+        }
+
+        private static bool IsVoidCall(Type valueType)
+        {
+            return typeof(Task) == valueType || typeof(void) == valueType;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Ribe.Core
 {
-    public class ServiceExecutionResult
+    public class Result
     {
         public string Error { get; set; }
 
@@ -8,6 +8,6 @@
 
         public string RequestId { get; set; }
 
-        public ServiceExecutionStatus Status { get; set; }
+        public Status Status { get; set; }
     }
 }

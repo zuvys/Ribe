@@ -34,7 +34,7 @@ namespace Ribe.Json.Messaging
             return parameterValues;
         }
 
-        public ServiceExecutionResult GetResult(Type dataType)
+        public Result GetResult(Type dataType)
         {
             if (Body == null || Body.Length == 0)
             {
@@ -42,16 +42,18 @@ namespace Ribe.Json.Messaging
             }
 
             var serializer = (JsonSerializer)Serializer;
-            var entry = serializer.DeserializeObject<ServiceExecutionResult>(Body);
-
-            entry.Data = serializer.DeserializeObject(entry.Data.ToString(), dataType);
+            var entry = serializer.DeserializeObject<Result>(Body);
+            if (entry.Data != null)
+            {
+                entry.Data = serializer.DeserializeObject(entry.Data.ToString(), dataType);
+            }
 
             return entry;
         }
 
-        public ServiceInvocationContext GetInvocationContext()
+        public InvokeContext GetInvokeContext()
         {
-            return new ServiceInvocationContext(this, (types, bytes) => ConvertParamterValues(types, bytes));
+            return new InvokeContext(this, (types, bytes) => ConvertParamterValues(types, bytes));
         }
     }
 }

@@ -9,12 +9,12 @@ namespace Ribe.Messaging
     {
         byte[] Body { get; set; }
 
-        ISerializer Serializer { get; }
-
         Dictionary<string, string> Headers { get; set; }
 
-        ServiceExecutionResult GetResult(Type dataType);
+        ISerializer Serializer { get; }
 
-        ServiceInvocationContext GetInvocationContext();
+        Result GetResult(Type dataType);
+
+        InvokeContext GetInvokeContext();
     }
 }

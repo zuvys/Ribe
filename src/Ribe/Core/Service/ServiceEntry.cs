@@ -16,7 +16,7 @@ namespace Ribe.Core.Service
 
         public Dictionary<string, ServiceMethod> ServiceMethodMap { get; set; }
 
-        public ServiceMethod GetServiceMethod(ServiceInvocationContext context)
+        public ServiceMethod GetServiceMethod(InvokeContext context)
         {
             if (ServiceMethodMap.ContainsKey(context.ServiceMethodKey))
             {

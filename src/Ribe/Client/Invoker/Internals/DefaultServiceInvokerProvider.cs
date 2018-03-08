@@ -1,22 +1,24 @@
-﻿using Ribe.Messaging;
+﻿using Ribe.Core.Service.Address;
+using Ribe.Infrustructure;
+using Ribe.Messaging;
 using Ribe.Serialize;
 
 namespace Ribe.Client.Invoker.Internals
 {
     public class DefaultServiceInvokerProvider : IServiceInvokerProvider
     {
-        private ISerializer _serializer;
-
         private IMessageFactory _messageFactory;
 
         private IRpcClientFacotry _clientFacotry;
 
+        private IIdGenerator _idGenerator;
+
         public DefaultServiceInvokerProvider(
-            ISerializer serializer,
+            IIdGenerator idGenerator,
             IMessageFactory messageFactory,
             IRpcClientFacotry clientFacotry)
         {
-            _serializer = serializer;
+            _idGenerator = idGenerator;
             _messageFactory = messageFactory;
             _clientFacotry = clientFacotry;
         }
@@ -24,7 +26,14 @@ namespace Ribe.Client.Invoker.Internals
         public IServiceInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new DefaultServiceInvoker(_serializer, _messageFactory, _clientFacotry);
+            return new DefaultServiceInvoker( _idGenerator, _messageFactory, _clientFacotry)
+            {
+                ServiceAddress = new ServiceAddress()
+                {
+                    Ip = "127.0.0.1",
+                    Port = 8080
+                }
+            };
         }
     }
 }

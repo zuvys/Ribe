@@ -30,12 +30,12 @@ namespace Ribe.DotNetty.Adapter
             var message = (IMessage)msg;
             if (message != null)
             {
-                var ctx = message.GetInvocationContext();
+                var ctx = message.GetInvokeContext();
                 var entry = _serviceEntryProvider.GetServiceEntry(ctx);
                 var method = entry.GetServiceMethod(ctx);
                 var paramterTypes = method.Parameters.Select(i => i.ParameterType).ToArray();
                 var parameterValues = ctx.ParamterValuesConvertor(paramterTypes, message.Body);
-
+                
                 var executionContext = new ServiceExecutionContext()
                 {
                     ParamterValues = parameterValues,
@@ -46,12 +46,12 @@ namespace Ribe.DotNetty.Adapter
 
                 var value = await _servceExecutor.ExecuteAsync(executionContext);
                 var serializer = message.Serializer;
-                var result = new ServiceExecutionResult
+                var result = new Result
                 {
                     Data = value,
                     Error = string.Empty,
                     RequestId = ctx.RequestId,
-                    Status = ServiceExecutionStatus.Success
+                    Status = Status.Success
                 };
 
                 await new NettyMessageSender(context).SendAsync(new JsonMessage()

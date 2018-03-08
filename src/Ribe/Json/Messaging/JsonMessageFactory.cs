@@ -1,16 +1,25 @@
-﻿using Ribe.Messaging;
+﻿using Ribe.Json.Serialize;
+using Ribe.Messaging;
+using Ribe.Serialize;
 using System.Collections.Generic;
 
 namespace Ribe.Json.Messaging
 {
     public class JsonMessageFactory : IMessageFactory
     {
-        public IMessage Create(Dictionary<string, string> headers, byte[] body)
+        private ISerializer _serializer;
+
+        public JsonMessageFactory(ISerializer serializer)
+        {
+            _serializer = serializer;
+        }
+
+        public IMessage Create(Dictionary<string, string> headers, object content)
         {
             return new JsonMessage()
             {
                 Headers = headers,
-                Body = body
+                Body = _serializer.SerializeObject(content)
             };
         }
     }

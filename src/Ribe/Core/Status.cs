@@ -1,6 +1,6 @@
 ﻿namespace Ribe.Core
 {
-    public enum ServiceExecutionStatus
+    public enum Status
     {
         Success,
 

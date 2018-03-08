@@ -9,7 +9,7 @@
             _cache = cache;
         }
 
-        public ServiceEntry GetServiceEntry(ServiceInvocationContext context)
+        public ServiceEntry GetServiceEntry(InvokeContext context)
         {
             return _cache.Get(context.ServicePath);
         }

@@ -4,6 +4,6 @@ namespace Ribe.Messaging
 {
     public interface IMessageFactory
     {
-        IMessage Create(Dictionary<string, string> headers, byte[] body);
+        IMessage Create(Dictionary<string, string> headers, object content);
     }
 }
