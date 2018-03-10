@@ -6,6 +6,7 @@ using DotNetty.Transport.Channels.Sockets;
 using Ribe.Client;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
+using Ribe.DotNetty.Messaging;
 using Ribe.Json.Codecs;
 using Ribe.Messaging;
 using System;
@@ -16,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Client
 {
-    public class RpcClientFactory : IRpcClientFacotry, IDisposable
+    public class DotNettyClientFactory : IClientFacotry, IDisposable
     {
         private Bootstrap _bootstrap;
 
@@ -24,7 +25,7 @@ namespace Ribe.DotNetty.Client
 
         private ConcurrentDictionary<string, TaskCompletionSource<IMessage>> _map;
 
-        public RpcClientFactory()
+        public DotNettyClientFactory()
         {
             _map = new ConcurrentDictionary<string, TaskCompletionSource<IMessage>>();
             _group = new MultithreadEventLoopGroup();
@@ -66,16 +67,12 @@ namespace Ribe.DotNetty.Client
                 }));
         }
 
-        public IRpcClient CreateClient(ServiceAddress address)
+        public IClient CreateClient(ServiceAddress address)
         {
             var endPoint = new IPEndPoint(IPAddress.Parse(address.Ip), address.Port);
             var channel = _bootstrap.ConnectAsync(endPoint).Result;
 
-            return new RpcClient(
-                () => channel.CloseAsync(),
-                (m) => channel.WriteAndFlushAsync(m),
-                (id) => _map.GetOrAdd(id, (k) => new TaskCompletionSource<IMessage>()).Task
-            );
+            return new Ribe.Client.Client(new DotNettyMessageSender(channel, false), _map);
         }
 
         public void Dispose()

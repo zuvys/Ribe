@@ -1,13 +1,14 @@
-﻿using Ribe.Messaging;
-
+﻿using Ribe.Json.Messaging;
+using Ribe.Messaging;
+using Ribe.Transport;
 using System;
 using System.Collections.Generic;
 
 namespace Ribe.Core
 {
-    public class InvokeContext
+    public class ServiceContext
     {
-        public IMessage Message { get; }
+        public Message Message { get; }
 
         public Func<Type[], byte[], object[]> ParamterValuesConvertor { get; }
 
@@ -17,7 +18,9 @@ namespace Ribe.Core
 
         public string ServiceMethodKey => Message.Headers.GetValueOrDefault(Constants.ServiceMethodKey);
 
-        public InvokeContext(IMessage message, Func<Type[], byte[], object[]> paramtersValueConvertor)
+        public IMessageSender Response { get; internal set; }
+
+        public ServiceContext(Message message, Func<Type[], byte[], object[]> paramtersValueConvertor)
         {
             Message = message;
             ParamterValuesConvertor = paramtersValueConvertor;

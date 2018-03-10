@@ -5,9 +5,9 @@ namespace Ribe.Json.Codecs
 {
     public class JsonEncoder : IEncoder
     {
-        public byte[] Encode(IMessage mesage)
+        public byte[] Encode(Message message)
         {
-            return mesage.Serializer.SerializeObject(mesage);
+            return message.Serializer.SerializeObject(message);
         }
     }
 }

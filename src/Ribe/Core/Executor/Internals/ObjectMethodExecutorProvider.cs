@@ -13,7 +13,7 @@ namespace Ribe.Core.Executor.Internals
             _methodExecutors = new ConcurrentDictionary<ObjectMethodExecutorCacheKey, IObjectMethodExecutor>();
         }
 
-        public IObjectMethodExecutor GetExecutor(ServiceExecutionContext context)
+        public IObjectMethodExecutor GetExecutor(ExecutionContext context)
         {
             var cacheKey = new ObjectMethodExecutorCacheKey()
             {

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Ribe.Client
 {
-    public interface IRpcClient : IDisposable
+    public interface IClient : IDisposable
     {
-        Task<IMessage> InvokeAsync(IMessage message);
+        Task<IMessage> SendMessageAsync(IMessage message);
     }
 }

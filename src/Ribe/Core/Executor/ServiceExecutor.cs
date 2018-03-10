@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Ribe.Core.Service;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Ribe.Core.Executor
@@ -23,7 +22,7 @@ namespace Ribe.Core.Executor
             _logger = logger;
         }
 
-        public Task<object> ExecuteAsync(ServiceExecutionContext context)
+        public Task<object> ExecuteAsync(ExecutionContext context)
         {
             var methodExecutor = _objectMethodExecutorProvider.GetExecutor(context);
             var service = _serviceActivator.Create(context.ServiceType);

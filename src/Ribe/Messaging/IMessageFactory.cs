@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Ribe.Json.Messaging;
+using System.Collections.Generic;
 
 namespace Ribe.Messaging
 {
     public interface IMessageFactory
     {
-        IMessage Create(Dictionary<string, string> headers, object content);
+        Message Create(Dictionary<string, string> headers, object content);
     }
 }

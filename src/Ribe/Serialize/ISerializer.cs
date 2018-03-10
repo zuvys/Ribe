@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ribe.Messaging;
+using System;
 
 namespace Ribe.Serialize
 {

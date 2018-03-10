@@ -31,7 +31,7 @@ namespace Client
                 cache.AddOrUpdate(item);
             }
 
-            new NettyServer(cache).StartAsync().Wait();
+            new DotNettyServer(cache).StartAsync().Wait();
             Console.ReadLine();
         }
     }

@@ -6,27 +6,35 @@ using System.Reflection;
 
 namespace Ribe.Client.ServiceProxy
 {
-    public class ServiceProxyBase
+    /// <summary>
+    /// the abstract class of service proxy 
+    /// </summary>
+    public abstract class ServiceProxyBase
     {
-        internal static MethodInfo InvokeMethod = typeof(ServiceProxyBase).GetMethod("Invoke", BindingFlags.Instance | BindingFlags.NonPublic);
+        internal static MethodInfo RemoteCallMethod { get; }
 
-        protected RpcServiceProxyOption Options { get; }
+        protected ServiceProxyOption Options { get; }
 
-        protected IServiceInvokerProvider ServiceInvokerProvider { get; }
+        protected IRemoteServiceInvokerProvider ServiceInvokerProvider { get; }
 
-        public ServiceProxyBase(IServiceInvokerProvider invokerProvider, RpcServiceProxyOption options)
+        static ServiceProxyBase()
+        {
+            RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(RemoteCall), BindingFlags.Instance | BindingFlags.NonPublic);
+        }
+
+        public ServiceProxyBase(IRemoteServiceInvokerProvider invokerProvider, ServiceProxyOption options)
         {
             ServiceInvokerProvider = invokerProvider;
             Options = options;
         }
 
-        protected object Invoke(string methodKey, Type valueType, object[] paramterValues)
+        protected object RemoteCall(string methodKey, Type valueType, object[] paramterValues)
         {
             var options = Options.Clone(new[] { new KeyValuePair<string, string>(Constants.ServiceMethodKey, methodKey) });
             var invoker = ServiceInvokerProvider.GetInvoker();
             if (invoker == null)
             {
-                throw new RpcException("get an IServiceInvoker failed!");
+                throw new RpcException("get the IServiceInvoker failed!");
             }
 
             return invoker.InvokeAsync(valueType, paramterValues, options).Result;

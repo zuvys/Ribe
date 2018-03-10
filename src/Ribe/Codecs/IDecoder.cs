@@ -4,6 +4,6 @@ namespace Ribe.Codecs
 {
     public interface IDecoder
     {
-        IMessage Decode(byte[] bytes);
+        Message Decode(byte[] bytes);
     }
 }

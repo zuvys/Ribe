@@ -4,6 +4,6 @@ namespace Ribe.Codecs
 {
     public interface IEncoder
     {
-        byte[] Encode(IMessage protocol);
+        byte[] Encode(Message message);
     }
 }

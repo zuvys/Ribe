@@ -4,6 +4,6 @@ namespace Ribe.Core.Executor
 {
     public interface IServceExecutor
     {
-        Task<object> ExecuteAsync(ServiceExecutionContext context);
+        Task<object> ExecuteAsync(ExecutionContext context);
     }
 }

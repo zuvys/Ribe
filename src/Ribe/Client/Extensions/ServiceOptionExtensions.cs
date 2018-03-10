@@ -6,14 +6,14 @@ namespace Ribe.Client.Extensions
 {
     public static class ServiceOptionExtensions
     {
-        public static RpcServiceProxyOption WithGroup(this RpcServiceProxyOption options, string group)
+        public static ServiceProxyOption WithGroup(this ServiceProxyOption options, string group)
         {
             options[Constants.Group] = group;
 
             return options;
         }
 
-        public static RpcServiceProxyOption WithVersion(this RpcServiceProxyOption options, string version)
+        public static ServiceProxyOption WithVersion(this ServiceProxyOption options, string version)
         {
             options[Constants.Version] = version;
 

@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Host
 {
-    public class NettyServer : IServer
+    public class DotNettyServer : IServer
     {
         private IChannel _channel;
 
         private ServiceEntryCache _cache;
 
-        public NettyServer(ServiceEntryCache cahche)
+        public DotNettyServer(ServiceEntryCache cahche)
         {
             _cache = cahche;
         }
@@ -43,19 +43,12 @@ namespace Ribe.DotNetty.Host
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
                     {
                         var pipe = channel.Pipeline;
-   
+
                         pipe.AddLast(new LengthFieldPrepender(4));
                         pipe.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
                         pipe.AddLast(new ChannelDecoderAdapter(new JsonDecoder()));
                         pipe.AddLast(new ChannelEncoderAdapter(new JsonEncoder()));
-
-                        pipe.AddLast(new ChannelServerHandlerAdapter(
-                            new DefaultServiceEntryProvider(_cache),
-                            new ServiceExecutor(
-                                new DefaultServiceActivator(),
-                                new ObjectMethodExecutorProvider(),
-                                new LoggerFactory().CreateLogger<ServiceExecutor>())
-                            ));
+                        pipe.AddLast(new ChannelServerHandlerAdapter(null));
                     }));
 
                 _channel = await bootstrap.BindAsync(8080);

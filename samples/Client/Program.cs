@@ -20,13 +20,13 @@ namespace Client
         {
             var serializer = new JsonSerializer();
             var messageFactory = new JsonMessageFactory(serializer);
-            var clientFacotry = new RpcClientFactory();
+            var clientFacotry = new DotNettyClientFactory();
 
             var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(
                 new LoggerFactory().CreateLogger("DefaultServiceMethodKeyFactory")
             );
 
-            var serviceInvokerProvider = new DefaultServiceInvokerProvider(
+            var serviceInvokerProvider = new DefaultRemoteServiceInvokerProvider(
                 new SnowflakeIdGenerator(1),
                 messageFactory,
                 clientFacotry
@@ -35,7 +35,7 @@ namespace Client
             var factory = new DefaultServiceProxyFactory(serviceInvokerProvider, serviceMethodKeyFacotry);
 
             var proxy = factory.CreateProxy<IShopService>(
-                () => new RpcServiceProxyOption().WithVersion("0.0.2"));
+                () => new ServiceProxyOption().WithVersion("0.0.2"));
 
             Console.WriteLine("Begin");
 

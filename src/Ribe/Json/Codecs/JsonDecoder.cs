@@ -1,5 +1,4 @@
 ﻿using Ribe.Codecs;
-using Ribe.Json.Messaging;
 using Ribe.Json.Serialize;
 using Ribe.Messaging;
 using Ribe.Serialize;
@@ -10,9 +9,9 @@ namespace Ribe.Json.Codecs
     {
         private ISerializer _serializer = new JsonSerializer();
 
-        public IMessage Decode(byte[] bytes)
+        public Message Decode(byte[] bytes)
         {
-            return _serializer.DeserializeObject<JsonMessage>(bytes);
+            return _serializer.DeserializeObject<Message>(bytes);
         }
     }
 }

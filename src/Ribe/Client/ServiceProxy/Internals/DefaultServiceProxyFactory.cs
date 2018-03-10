@@ -29,7 +29,7 @@ namespace Ribe.Client.ServiceProxy
 
         private IServiceMethodKeyFactory _serviceMethodKeyFactory;
 
-        private IServiceInvokerProvider _serviceInvokerProvider;
+        private IRemoteServiceInvokerProvider _serviceInvokerProvider;
 
         static DefaultServiceProxyFactory()
         {
@@ -44,7 +44,7 @@ namespace Ribe.Client.ServiceProxy
         /// <param name="serviceInvokerProvider"></param>
         /// <param name="serviceMethodKeyFactory"></param>
         public DefaultServiceProxyFactory(
-            IServiceInvokerProvider serviceInvokerProvider,
+            IRemoteServiceInvokerProvider serviceInvokerProvider,
             IServiceMethodKeyFactory serviceMethodKeyFactory
         )
         {
@@ -52,7 +52,7 @@ namespace Ribe.Client.ServiceProxy
             _serviceMethodKeyFactory = serviceMethodKeyFactory;
         }
 
-        public TService CreateProxy<TService>(Func<RpcServiceProxyOption> builder = null)
+        public TService CreateProxy<TService>(Func<ServiceProxyOption> builder = null)
         {
             var type = typeof(TService);
             if (!type.IsInterface)
@@ -68,7 +68,7 @@ namespace Ribe.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(IServiceInvokerProvider), typeof(RpcServiceProxyOption) };
+                var ctorTypes = new[] { typeof(IRemoteServiceInvokerProvider), typeof(ServiceProxyOption) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,
@@ -115,14 +115,14 @@ namespace Ribe.Client.ServiceProxy
                         }
                     }
 
-                    il.Emit(OpCodes.Call, ServiceProxyBase.InvokeMethod);
+                    il.Emit(OpCodes.Call, ServiceProxyBase.RemoteCallMethod);
                     il.Emit(OpCodes.Ret);
                 }
 
                 return typeBudiler.CreateType();
             });
 
-            var options = builder != null ? builder() : new RpcServiceProxyOption();
+            var options = builder != null ? builder() : new ServiceProxyOption();
 
             //TODO:ServicePath在服务端生成
             options[Constants.ServicePath] = $"/{ options[Constants.Group]}/{ type.Namespace + "." + type.Name}/{options[Constants.Version]}/";

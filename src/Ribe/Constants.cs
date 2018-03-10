@@ -19,10 +19,10 @@
 
         public const string ServiceMethodKey = "Service_Method_Key";
 
-        public const string IsInvocation = "Is_Invocation";
-
         public const string DefaultGroup = "default";
 
         public const string DefaultVersion = "0.0.1";
+
+        public const string DefaultContentType = "Json";
     }
 }

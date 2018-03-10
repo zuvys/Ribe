@@ -5,28 +5,28 @@ using Ribe.Serialize;
 
 namespace Ribe.Client.Invoker.Internals
 {
-    public class DefaultServiceInvokerProvider : IServiceInvokerProvider
+    public class DefaultRemoteServiceInvokerProvider : IRemoteServiceInvokerProvider
     {
         private IMessageFactory _messageFactory;
 
-        private IRpcClientFacotry _clientFacotry;
+        private IClientFacotry _clientFacotry;
 
         private IIdGenerator _idGenerator;
 
-        public DefaultServiceInvokerProvider(
+        public DefaultRemoteServiceInvokerProvider(
             IIdGenerator idGenerator,
             IMessageFactory messageFactory,
-            IRpcClientFacotry clientFacotry)
+            IClientFacotry clientFacotry)
         {
             _idGenerator = idGenerator;
             _messageFactory = messageFactory;
             _clientFacotry = clientFacotry;
         }
 
-        public IServiceInvoker GetInvoker()
+        public IRemoteServiceInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new DefaultServiceInvoker( _idGenerator, _messageFactory, _clientFacotry)
+            return new DefaultRemoteServiceInvoker( _idGenerator, _messageFactory, _clientFacotry)
             {
                 ServiceAddress = new ServiceAddress()
                 {

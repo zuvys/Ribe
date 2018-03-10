@@ -1,10 +1,10 @@
-﻿using Ribe.Json.Serialize;
-using Ribe.Messaging;
+﻿using Ribe.Messaging;
 using Ribe.Serialize;
 using System.Collections.Generic;
 
 namespace Ribe.Json.Messaging
 {
+    //removed
     public class JsonMessageFactory : IMessageFactory
     {
         private ISerializer _serializer;
@@ -14,12 +14,12 @@ namespace Ribe.Json.Messaging
             _serializer = serializer;
         }
 
-        public IMessage Create(Dictionary<string, string> headers, object content)
+        public Message Create(Dictionary<string, string> headers, object content)
         {
-            return new JsonMessage()
+            return new Message()
             {
                 Headers = headers,
-                Body = _serializer.SerializeObject(content)
+                Content = _serializer.SerializeObject(content)
             };
         }
     }

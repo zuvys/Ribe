@@ -3,17 +3,17 @@ using System.Linq;
 
 namespace Ribe.Client
 {
-    public class RpcServiceProxyOption : Dictionary<string, string>
+    public class ServiceProxyOption : Dictionary<string, string>
     {
-        public RpcServiceProxyOption()
+        public ServiceProxyOption()
         {
             this[Constants.Group] = Constants.DefaultGroup;
             this[Constants.Version] = Constants.DefaultVersion;
         }
 
-        public RpcServiceProxyOption Clone(IEnumerable<KeyValuePair<string, string>> kvs = null)
+        public ServiceProxyOption Clone(IEnumerable<KeyValuePair<string, string>> kvs = null)
         {
-            var options = new RpcServiceProxyOption();
+            var options = new ServiceProxyOption();
 
             foreach (var option in this.Concat(kvs))
             {

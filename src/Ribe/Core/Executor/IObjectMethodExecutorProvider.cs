@@ -2,6 +2,6 @@
 {
     public interface IObjectMethodExecutorProvider
     {
-        IObjectMethodExecutor GetExecutor(ServiceExecutionContext context);
+        IObjectMethodExecutor GetExecutor(ExecutionContext context);
     }
 }

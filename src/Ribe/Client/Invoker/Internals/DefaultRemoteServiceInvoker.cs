@@ -1,26 +1,25 @@
 ﻿using Ribe.Core.Service.Address;
 using Ribe.Infrustructure;
 using Ribe.Messaging;
-using Ribe.Serialize;
 using System;
 using System.Threading.Tasks;
 
 namespace Ribe.Client.Invoker.Internals
 {
-    public class DefaultServiceInvoker : IServiceInvoker
+    public  class DefaultRemoteServiceInvoker : IRemoteServiceInvoker
     {
         private IMessageFactory _messageFactory;
 
-        private IRpcClientFacotry _clientFacotry;
+        private IClientFacotry _clientFacotry;
 
         private IIdGenerator _idGenerator;
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        public DefaultServiceInvoker(
+        public DefaultRemoteServiceInvoker(
             IIdGenerator idGenerator,
             IMessageFactory messageFactory,
-            IRpcClientFacotry clientFacotry
+            IClientFacotry clientFacotry
         )
         {
             _idGenerator = idGenerator;
@@ -28,7 +27,7 @@ namespace Ribe.Client.Invoker.Internals
             _clientFacotry = clientFacotry;
         }
 
-        public async Task<object> InvokeAsync(Type valueType, object[] paramterValues, RpcServiceProxyOption options)
+        public async Task<object> InvokeAsync(Type valueType, object[] paramterValues, ServiceProxyOption options)
         {
             var isAsyncCall = IsAsyncCall(valueType);
             var isVoidCall = IsVoidCall(valueType);
@@ -36,39 +35,41 @@ namespace Ribe.Client.Invoker.Internals
 
             EnsureRequestId(options);
 
-            var message = _messageFactory.Create(options, paramterValues);
-            if (message == null)
+            var invokeMessage = _messageFactory.Create(options, paramterValues);
+            if (invokeMessage == null)
             {
                 throw new RpcException("create invoke message failed!", options[Constants.RequestId]);
             }
 
-            var client = _clientFacotry.CreateClient(ServiceAddress);
-            var returnMessage = await client.InvokeAsync(message);
-            if (returnMessage == null)
+            using (var client = _clientFacotry.CreateClient(ServiceAddress))
             {
-                throw new RpcException("return message is null!", options[Constants.RequestId]);
-            }
+                var returnMessage = await client.SendMessageAsync(invokeMessage);
+                if (returnMessage == null)
+                {
+                    throw new RpcException("return message is null!", options[Constants.RequestId]);
+                }
 
-            var result = returnMessage.GetResult(dataType);
-            if (result == null)
-            {
-                throw new RpcException("return value is null", options[Constants.RequestId]);
-            }
+                var result = returnMessage.GetResult(dataType);
+                if (result == null)
+                {
+                    throw new RpcException("return value is null", options[Constants.RequestId]);
+                }
 
-            if (!string.IsNullOrEmpty(result.Error))
-            {
-                throw new RpcException(result.Error, options[Constants.RequestId]);
-            }
+                if (!string.IsNullOrEmpty(result.Error))
+                {
+                    throw new RpcException(result.Error, options[Constants.RequestId]);
+                }
 
-            if (!isAsyncCall)
-            {
-                return result.Data;
-            }
+                if (!isAsyncCall)
+                {
+                    return result.Data;
+                }
 
-            return Task.FromResult(result.Data);
+                return Task.FromResult(result.Data);
+            }
         }
 
-        private void EnsureRequestId(RpcServiceProxyOption options)
+        private void EnsureRequestId(ServiceProxyOption options)
         {
             if (!options.ContainsKey(Constants.RequestId))
             {
