@@ -11,7 +11,7 @@
 
         public const string RequestId = "Request_Id";
 
-        public const string MessageType = "Message_Type";
+        public const string Accept = "Accept";
 
         public const string ContentType = "Content_Type";
 
@@ -24,5 +24,7 @@
         public const string DefaultVersion = "0.0.1";
 
         public const string DefaultContentType = "Json";
+
+        public const string DefaultAccpet = "Json";
     }
 }

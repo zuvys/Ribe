@@ -1,29 +1,29 @@
 ﻿using Ribe.Core.Service.Address;
-using Ribe.Infrustructure;
 using Ribe.Messaging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ribe.Client.Invoker.Internals
 {
-    public  class DefaultRemoteServiceInvoker : IRemoteServiceInvoker
+    public class DefaultRemoteServiceInvoker : IRemoteServiceInvoker
     {
-        private IMessageFactory _messageFactory;
+        /// <summary>
+        /// RequestId
+        /// </summary>
+        private static long CurrentId = 0;
 
-        private IClientFacotry _clientFacotry;
-
-        private IIdGenerator _idGenerator;
+        private IRpcClientFacotry _clientFacotry;
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        public DefaultRemoteServiceInvoker(
-            IIdGenerator idGenerator,
-            IMessageFactory messageFactory,
-            IClientFacotry clientFacotry
-        )
+        static DefaultRemoteServiceInvoker()
         {
-            _idGenerator = idGenerator;
-            _messageFactory = messageFactory;
+            CurrentId = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+        }
+
+        public DefaultRemoteServiceInvoker(IRpcClientFacotry clientFacotry)
+        {
             _clientFacotry = clientFacotry;
         }
 
@@ -32,40 +32,34 @@ namespace Ribe.Client.Invoker.Internals
             var isAsyncCall = IsAsyncCall(valueType);
             var isVoidCall = IsVoidCall(valueType);
             var dataType = isAsyncCall && !isVoidCall ? valueType.GetGenericArguments()[0] : valueType;
+            var invokeMessage = new RemoteCallMessage(options, paramterValues);
 
             EnsureRequestId(options);
 
-            var invokeMessage = _messageFactory.Create(options, paramterValues);
-            if (invokeMessage == null)
-            {
-                throw new RpcException("create invoke message failed!", options[Constants.RequestId]);
-            }
-
             using (var client = _clientFacotry.CreateClient(ServiceAddress))
             {
-                var returnMessage = await client.SendMessageAsync(invokeMessage);
-                if (returnMessage == null)
-                {
-                    throw new RpcException("return message is null!", options[Constants.RequestId]);
-                }
+                var requestId = await client.SendRequestAsync(invokeMessage);
 
-                var result = returnMessage.GetResult(dataType);
-                if (result == null)
-                {
-                    throw new RpcException("return value is null", options[Constants.RequestId]);
-                }
+                var response = await client.GetReponseAsync(requestId);
 
-                if (!string.IsNullOrEmpty(result.Error))
-                {
-                    throw new RpcException(result.Error, options[Constants.RequestId]);
-                }
+                ////var result = returnMessage.GetResult(dataType);
+                ////if (result == null)
+                ////{
+                ////    throw new RpcException("return value is null", options[Constants.RequestId]);
+                ////}
 
-                if (!isAsyncCall)
-                {
-                    return result.Data;
-                }
+                //if (!string.IsNullOrEmpty(result.Error))
+                //{
+                //    throw new RpcException(result.Error, options[Constants.RequestId]);
+                //}
 
-                return Task.FromResult(result.Data);
+                //if (!isAsyncCall)
+                //{
+                //    return result.Data;
+                //}
+
+                //return Task.FromResult(result.Data);
+                return null;
             }
         }
 
@@ -73,7 +67,7 @@ namespace Ribe.Client.Invoker.Internals
         {
             if (!options.ContainsKey(Constants.RequestId))
             {
-                options[Constants.RequestId] = _idGenerator.CreateId().ToString();
+                options[Constants.RequestId] = Interlocked.Add(ref CurrentId, 1).ToString();
             }
         }
 

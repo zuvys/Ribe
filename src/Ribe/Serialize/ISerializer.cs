@@ -1,10 +1,11 @@
-﻿using Ribe.Messaging;
-using System;
+﻿using System;
 
 namespace Ribe.Serialize
 {
     public interface ISerializer
     {
+        string FormatType { get; }
+
         byte[] SerializeObject(object value);
 
         object DeserializeObject(byte[] bytes, Type type);

@@ -1,6 +1,4 @@
-﻿using Ribe.Json.Messaging;
-using Ribe.Messaging;
-using Ribe.Transport;
+﻿using Ribe.Messaging;
 using System;
 using System.Collections.Generic;
 

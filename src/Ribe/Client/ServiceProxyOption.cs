@@ -9,6 +9,8 @@ namespace Ribe.Client
         {
             this[Constants.Group] = Constants.DefaultGroup;
             this[Constants.Version] = Constants.DefaultVersion;
+            this[Constants.ContentType] = Constants.DefaultContentType;
+            this[Constants.Accept] = Constants.DefaultAccpet;
         }
 
         public ServiceProxyOption Clone(IEnumerable<KeyValuePair<string, string>> kvs = null)

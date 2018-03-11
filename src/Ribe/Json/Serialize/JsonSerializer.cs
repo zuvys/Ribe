@@ -7,6 +7,8 @@ namespace Ribe.Json.Serialize
 {
     public class JsonSerializer : ISerializer
     {
+        public string FormatType => "json";
+
         public byte[] SerializeObject(object value)
         {
             return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value));

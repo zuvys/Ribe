@@ -5,12 +5,9 @@ using Ribe.Client.Invoker.Internals;
 using Ribe.Client.ServiceProxy;
 using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Client;
-using Ribe.Infrustructure;
-using Ribe.Json.Messaging;
 using Ribe.Json.Serialize;
 using ServiceInterfaces;
 using System;
-using System.Threading.Tasks;
 
 namespace Client
 {
@@ -19,16 +16,13 @@ namespace Client
         static void Main(string[] args)
         {
             var serializer = new JsonSerializer();
-            var messageFactory = new JsonMessageFactory(serializer);
-            var clientFacotry = new DotNettyClientFactory();
+            var clientFacotry = new DotNettyClientFactory(null);
 
             var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(
                 new LoggerFactory().CreateLogger("DefaultServiceMethodKeyFactory")
             );
 
             var serviceInvokerProvider = new DefaultRemoteServiceInvokerProvider(
-                new SnowflakeIdGenerator(1),
-                messageFactory,
                 clientFacotry
             );
 

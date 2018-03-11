@@ -1,32 +1,23 @@
 ﻿using Ribe.Core.Service.Address;
 using Ribe.Infrustructure;
-using Ribe.Messaging;
 using Ribe.Serialize;
+using System;
 
 namespace Ribe.Client.Invoker.Internals
 {
     public class DefaultRemoteServiceInvokerProvider : IRemoteServiceInvokerProvider
     {
-        private IMessageFactory _messageFactory;
+        private IRpcClientFacotry _clientFacotry;
 
-        private IClientFacotry _clientFacotry;
-
-        private IIdGenerator _idGenerator;
-
-        public DefaultRemoteServiceInvokerProvider(
-            IIdGenerator idGenerator,
-            IMessageFactory messageFactory,
-            IClientFacotry clientFacotry)
+        public DefaultRemoteServiceInvokerProvider(IRpcClientFacotry clientFacotry)
         {
-            _idGenerator = idGenerator;
-            _messageFactory = messageFactory;
             _clientFacotry = clientFacotry;
         }
 
         public IRemoteServiceInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new DefaultRemoteServiceInvoker( _idGenerator, _messageFactory, _clientFacotry)
+            return new DefaultRemoteServiceInvoker(_clientFacotry)
             {
                 ServiceAddress = new ServiceAddress()
                 {

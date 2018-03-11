@@ -2,6 +2,6 @@
 {
     public interface ISerializerProvider
     {
-        ISerializer GetSerializer();
+        ISerializer GetSerializer(string formatType);
     }
 }

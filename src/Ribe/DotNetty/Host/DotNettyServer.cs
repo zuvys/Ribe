@@ -4,6 +4,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
+using Ribe.Codecs;
 using Ribe.Core.Executor;
 using Ribe.Core.Executor.Internals;
 using Ribe.Core.Service;
@@ -46,9 +47,9 @@ namespace Ribe.DotNetty.Host
 
                         pipe.AddLast(new LengthFieldPrepender(4));
                         pipe.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                        pipe.AddLast(new ChannelDecoderAdapter(new JsonDecoder()));
-                        pipe.AddLast(new ChannelEncoderAdapter(new JsonEncoder()));
-                        pipe.AddLast(new ChannelServerHandlerAdapter(null));
+                        pipe.AddLast(new ChannelDecoderAdapter(new DecoderProvider(new[] { new JsonDecoder() })));
+                        pipe.AddLast(new ChannelEncoderAdapter(new EncoderProvider(new[] { new JsonEncoder() })));
+                        pipe.AddLast(new ChannelServerHandlerAdapter(null, null));
                     }));
 
                 _channel = await bootstrap.BindAsync(8080);

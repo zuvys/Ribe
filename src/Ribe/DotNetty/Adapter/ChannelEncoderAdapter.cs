@@ -2,6 +2,8 @@
 using DotNetty.Transport.Channels;
 using Ribe.Codecs;
 using Ribe.Messaging;
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,30 +11,39 @@ namespace Ribe.DotNetty.Adapter
 {
     public class ChannelEncoderAdapter : MessageToMessageEncoder<Message>
     {
-        private IEncoder _encoder;
+        private IEncoderProvider _encoderProvider;
 
-        const int ConentTypeLength = 1;
-
-        public ChannelEncoderAdapter(IEncoder encoder)
+        public ChannelEncoderAdapter(IEncoderProvider encoderProvider)
         {
-            _encoder = encoder;
+            _encoderProvider = encoderProvider;
         }
 
         protected override void Encode(IChannelHandlerContext context, Message input, List<object> output)
         {
             if (input != null)
             {
-                var typeBytes = Encoding.UTF8.GetBytes(input.Headers.GetValueOrDefault(Constants.ContentType));
-                var offset = ConentTypeLength + typeBytes.Length;
+                var contentType = input.Headers.GetValueOrDefault(Constants.ContentType);
+                if (string.IsNullOrEmpty(contentType))
+                {
+                    throw new NotSupportedException($"the ContentType with empty is not supported!");
+                }
 
-                var bytes = _encoder.Encode(input);
-                var buf = context.Allocator.Buffer(bytes.Length + offset);
+                var encoder = _encoderProvider.GetEncoder(contentType);
+                if (encoder == null)
+                {
+                    throw new NotSupportedException($"the ContentType with {contentType} is not supported!");
+                }
 
-                buf.WriteByte((byte)typeBytes.Length);
-                buf.WriteBytes(typeBytes);
-                buf.WriteBytes(bytes);
+                var bytes = encoder.Encode(input);
+                var codec = Encoding.UTF8.GetBytes(contentType);
 
-                output.Add(buf);
+                var buffer = context.Allocator.Buffer(bytes.Length + codec.Length);
+
+                buffer.WriteByte((byte)codec.Length);
+                buffer.WriteBytes(codec);
+                buffer.WriteBytes(bytes);
+
+                output.Add(buffer);
             }
         }
     }

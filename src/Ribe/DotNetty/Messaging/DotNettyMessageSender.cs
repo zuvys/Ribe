@@ -1,34 +1,21 @@
 ﻿using DotNetty.Transport.Channels;
 using Ribe.Messaging;
-using Ribe.Transport;
-using System;
 using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Messaging
 {
-    public class DotNettyMessageSender : IMessageSender, IDisposable
+    public class DotNettyMessageSender : IMessageSender
     {
-        private IChannel _channel;
+        protected IChannel Channel { get; }
 
-        private bool _keepConnectionAlive;
-
-        public DotNettyMessageSender(IChannel channel, bool keepConnectionAlive = true)
+        public DotNettyMessageSender(IChannel channel)
         {
-            _channel = channel;
-            _keepConnectionAlive = keepConnectionAlive;
+            Channel = channel;
         }
 
-        public Task SendAsync(IMessage message)
+        public Task SendAsync(Message message)
         {
-            return _channel.WriteAndFlushAsync(message);
-        }
-
-        public void Dispose()
-        {
-            if (!_keepConnectionAlive)
-            {
-                _channel.DisconnectAsync().WithNoWaiting();
-            }
+            return Channel.WriteAndFlushAsync(message);
         }
     }
 }

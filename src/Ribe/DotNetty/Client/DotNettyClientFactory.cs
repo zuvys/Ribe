@@ -4,11 +4,13 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Ribe.Client;
+using Ribe.Codecs;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
 using Ribe.DotNetty.Messaging;
 using Ribe.Json.Codecs;
 using Ribe.Messaging;
+using Ribe.Serialize;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,17 +19,21 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Client
 {
-    public class DotNettyClientFactory : IClientFacotry, IDisposable
+    public class DotNettyClientFactory : IRpcClientFacotry, IDisposable
     {
         private Bootstrap _bootstrap;
 
         private IEventLoopGroup _group;
 
-        private ConcurrentDictionary<string, TaskCompletionSource<IMessage>> _map;
+        private ConcurrentDictionary<string, TaskCompletionSource<Message>> _map;
 
-        public DotNettyClientFactory()
+        private ISerializerProvider _serializerProvider;
+
+        public DotNettyClientFactory(ISerializerProvider serializerProvider)
         {
-            _map = new ConcurrentDictionary<string, TaskCompletionSource<IMessage>>();
+            _serializerProvider = serializerProvider;
+
+            _map = new ConcurrentDictionary<string, TaskCompletionSource<Message>>();
             _group = new MultithreadEventLoopGroup();
             _bootstrap = new Bootstrap()
                 .Group(_group)
@@ -39,8 +45,8 @@ namespace Ribe.DotNetty.Client
                     pip.AddLast(new LoggingHandler());
                     pip.AddLast(new LengthFieldPrepender(4));
                     pip.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                    pip.AddLast(new ChannelDecoderAdapter(new JsonDecoder()));
-                    pip.AddLast(new ChannelEncoderAdapter(new JsonEncoder()));
+                    pip.AddLast(new ChannelDecoderAdapter(new DecoderProvider(new[] { new JsonDecoder() })));
+                    pip.AddLast(new ChannelEncoderAdapter(new EncoderProvider(new[] { new JsonEncoder() })));
                     pip.AddLast(new ChannelClientHandlerAdapter((message) =>
                     {
                         if (message == null)
@@ -67,12 +73,13 @@ namespace Ribe.DotNetty.Client
                 }));
         }
 
-        public IClient CreateClient(ServiceAddress address)
+        public IRpcClient CreateClient(ServiceAddress address)
         {
             var endPoint = new IPEndPoint(IPAddress.Parse(address.Ip), address.Port);
             var channel = _bootstrap.ConnectAsync(endPoint).Result;
+            var sender = new DotNettyClientMessageSender(channel, _serializerProvider);
 
-            return new Ribe.Client.Client(new DotNettyMessageSender(channel, false), _map);
+            return new RpcClient(sender, _map);
         }
 
         public void Dispose()

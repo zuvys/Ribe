@@ -1,10 +1,10 @@
 ﻿using Ribe.Messaging;
 using System.Threading.Tasks;
 
-namespace Ribe.Transport
+namespace Ribe.Messaging
 {
     public interface IMessageSender
     {
-        Task SendAsync(IMessage message);
+        Task SendAsync(Message message);
     }
 }

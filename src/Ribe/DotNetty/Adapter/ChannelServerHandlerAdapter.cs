@@ -9,9 +9,12 @@ namespace Ribe.DotNetty.Adapter
     {
         private IServerInvokerFacotry _serviceInvokerFacotry;
 
-        public ChannelServerHandlerAdapter(IServerInvokerFacotry serviceInvokerFacotry)
+        private IMessageConvertorProvider _convertorProvider;
+
+        public ChannelServerHandlerAdapter(IServerInvokerFacotry serviceInvokerFacotry, IMessageConvertorProvider convertorProvider)
         {
             _serviceInvokerFacotry = serviceInvokerFacotry;
+            _convertorProvider = convertorProvider;
         }
 
         public async override void ChannelRead(IChannelHandlerContext context, object msg)
@@ -19,10 +22,17 @@ namespace Ribe.DotNetty.Adapter
             var message = (Message)msg;
             if (message != null)
             {
-                var ctx = message.GetInvokeContext();
+                var convertor = _convertorProvider.GetConvertor(message);
+                if (convertor == null)
+                {
+                    //log 
+                    //response
+                }
+
+                var ctx = convertor.ConvertToServiceContext(message, null);
                 if (ctx != null)
                 {
-                    ctx.Response = new DotNettyMessageSender(context.Channel, true);
+                    ctx.Response = new DotNettyMessageSender(context.Channel);
                 }
 
                 await _serviceInvokerFacotry.CreateInvoker(ctx).InvokeAsync();
