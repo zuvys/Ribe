@@ -25,7 +25,7 @@ namespace Ribe.DotNetty.Client
 
         private IEventLoopGroup _group;
 
-        private ConcurrentDictionary<string, TaskCompletionSource<Message>> _map;
+        private ConcurrentDictionary<long, TaskCompletionSource<Message>> _map;
 
         private ISerializerProvider _serializerProvider;
 
@@ -33,7 +33,7 @@ namespace Ribe.DotNetty.Client
         {
             _serializerProvider = serializerProvider;
 
-            _map = new ConcurrentDictionary<string, TaskCompletionSource<Message>>();
+            _map = new ConcurrentDictionary<long, TaskCompletionSource<Message>>();
             _group = new MultithreadEventLoopGroup();
             _bootstrap = new Bootstrap()
                 .Group(_group)
@@ -59,16 +59,24 @@ namespace Ribe.DotNetty.Client
                             throw new NullReferenceException("message headers is null!");
                         }
 
-                        var id = message.Headers.GetValueOrDefault(Constants.RequestId);
-                        if (id == null)
+                        var requestId = message.Headers.GetValueOrDefault(Constants.RequestId);
+                        if (requestId == null)
                         {
                             throw new Exception($"Result Headers not constains {Constants.RequestId} key");
                         }
 
-                        if (_map.TryRemove(id, out var tcs))
+                        if (long.TryParse(requestId, out long id))
                         {
-                            tcs.SetResult(message);
+                            if (_map.TryRemove(id, out var tcs))
+                            {
+                                tcs.SetResult(message);
+                                return;
+                            }
+
+                            throw new Exception($"the request with id {id} was not found!");
                         }
+
+                        throw new NotSupportedException("request id must type with long");
                     }));
                 }));
         }

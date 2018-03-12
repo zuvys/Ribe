@@ -39,7 +39,7 @@ namespace Ribe.DotNetty.Adapter
 
                 var buffer = context.Allocator.Buffer(bytes.Length + codec.Length);
 
-                buffer.WriteByte((byte)codec.Length);
+                buffer.WriteByte(codec.Length);
                 buffer.WriteBytes(codec);
                 buffer.WriteBytes(bytes);
 
