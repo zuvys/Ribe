@@ -17,19 +17,15 @@ namespace Ribe.DotNetty.Messaging
             _serializerProvider = serializerProvider ?? throw new NullReferenceException(nameof(serializerProvider));
         }
 
-        public Task SendAsync(RemoteCallMessage invokeMessage)
+        public Task SendAsync(RemoteCallMessage message)
         {
-            var serializer = _serializerProvider.GetSerializer(invokeMessage.Headers[Constants.ContentType]);
+            var serializer = _serializerProvider.GetSerializer(message.Headers[Constants.ContentType]);
             if (serializer == null)
             {
                 throw new NotFiniteNumberException(nameof(serializer));
             }
 
-            var message = new Message(
-                invokeMessage.Headers,
-                serializer.SerializeObject(invokeMessage.ParamterValues));
-
-            return SendAsync(message);
+            return SendAsync(new Message(message.Headers, serializer.SerializeObject(message.ParamterValues)));
         }
 
         public void Dispose()

@@ -1,50 +1,55 @@
 ﻿using Ribe.Messaging;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ribe.Client
 {
     public class RpcClient : IRpcClient
     {
+        private static long IdSeed;
+
         private IClientMessageSender _sender;
 
-        private ConcurrentDictionary<string, TaskCompletionSource<Message>> _requestMap;
+        private ConcurrentDictionary<long, TaskCompletionSource<Message>> _map;
+
+        static RpcClient()
+        {
+            IdSeed = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+        }
 
         public RpcClient(
             IClientMessageSender sender,
-            ConcurrentDictionary<string, TaskCompletionSource<Message>> requestMap)
+            ConcurrentDictionary<long, TaskCompletionSource<Message>> map)
         {
             if (_sender == null)
             {
                 throw new NullReferenceException(nameof(_sender));
             }
 
-            if (_requestMap == null)
+            if (_map == null)
             {
-                throw new NullReferenceException(nameof(_requestMap));
+                throw new NullReferenceException(nameof(map));
             }
 
             _sender = sender;
-            _requestMap = requestMap;
+            _map = map;
         }
 
-        public async Task<string> SendRequestAsync(RemoteCallMessage message)
+        public async Task<long> SendRequestAsync(RemoteCallMessage message)
         {
-            var id = message.Headers.GetValueOrDefault(Constants.RequestId);
-            if (!string.IsNullOrEmpty(id))
-            {
-                await _sender.SendAsync(message);
-                return id;
-            }
+            var id = Interlocked.Add(ref IdSeed, 1);
 
-            throw new RpcException("request id is empty!");
+            message.Headers[Constants.RequestId] = id.ToString();
+
+            await _sender.SendAsync(message);
+            return id;
         }
 
-        public async Task<Message> GetReponseAsync(string id)
+        public async Task<Message> GetReponseAsync(long id)
         {
-            return await _requestMap.GetOrAdd(id.ToString(), (k) => new TaskCompletionSource<Message>()).Task;
+            return await _map.GetOrAdd(id, (k) => new TaskCompletionSource<Message>()).Task;
         }
 
         public void Dispose()

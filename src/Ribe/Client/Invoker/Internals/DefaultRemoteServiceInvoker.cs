@@ -1,73 +1,73 @@
 ﻿using Ribe.Core.Service.Address;
 using Ribe.Messaging;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ribe.Client.Invoker.Internals
 {
+    /// <summary>
+    /// default <see cref="IRemoteServiceInvoker"/> 
+    /// </summary>
     public class DefaultRemoteServiceInvoker : IRemoteServiceInvoker
     {
-        /// <summary>
-        /// RequestId
-        /// </summary>
-        private static long CurrentId = 0;
-
         private IRpcClientFacotry _clientFacotry;
+
+        private IMessageConvertorProvider _convertorProvider;
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        static DefaultRemoteServiceInvoker()
-        {
-            CurrentId = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
-        }
-
-        public DefaultRemoteServiceInvoker(IRpcClientFacotry clientFacotry)
+        public DefaultRemoteServiceInvoker(IRpcClientFacotry clientFacotry, IMessageConvertorProvider convetorProvider)
         {
             _clientFacotry = clientFacotry;
+            _convertorProvider = convetorProvider;
         }
 
+        /// <summary>
+        /// Invoke Service
+        /// </summary>
+        /// <param name="valueType"></param>
+        /// <param name="paramterValues"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public async Task<object> InvokeAsync(Type valueType, object[] paramterValues, ServiceProxyOption options)
         {
-            var isAsyncCall = IsAsyncCall(valueType);
-            var isVoidCall = IsVoidCall(valueType);
-            var dataType = isAsyncCall && !isVoidCall ? valueType.GetGenericArguments()[0] : valueType;
-            var invokeMessage = new RemoteCallMessage(options, paramterValues);
-
-            EnsureRequestId(options);
+            var isVoid = IsVoidCall(valueType);
+            var isAsync = IsAsyncCall(valueType);
+            var dataType = isAsync && !isVoid ? valueType.GetGenericArguments()[0] : valueType;
 
             using (var client = _clientFacotry.CreateClient(ServiceAddress))
             {
-                var requestId = await client.SendRequestAsync(invokeMessage);
+                var id = await client.SendRequestAsync(new RemoteCallMessage(options, paramterValues));
 
-                var response = await client.GetReponseAsync(requestId);
+                var message = await client.GetReponseAsync(id);
+                if (message == null)
+                {
+                    throw new NullReferenceException(nameof(message));
+                }
 
-                ////var result = returnMessage.GetResult(dataType);
-                ////if (result == null)
-                ////{
-                ////    throw new RpcException("return value is null", options[Constants.RequestId]);
-                ////}
+                var convertor = _convertorProvider.GetConvertor(message);
+                if (convertor == null)
+                {
+                    throw new NotSupportedException("not supported!");
+                }
 
-                //if (!string.IsNullOrEmpty(result.Error))
-                //{
-                //    throw new RpcException(result.Error, options[Constants.RequestId]);
-                //}
+                var data = convertor.ConvertToResult(message, dataType);
+                if (data == null)
+                {
+                    throw new RpcServerException("return value is null", id);
+                }
 
-                //if (!isAsyncCall)
-                //{
-                //    return result.Data;
-                //}
+                if (!string.IsNullOrEmpty(data.Error))
+                {
+                    throw new RpcServerException(data.Error, id);
+                }
 
-                //return Task.FromResult(result.Data);
-                return null;
-            }
-        }
+                if (isVoid)
+                {
+                    return isAsync ? Task.CompletedTask : null;
+                }
 
-        private void EnsureRequestId(ServiceProxyOption options)
-        {
-            if (!options.ContainsKey(Constants.RequestId))
-            {
-                options[Constants.RequestId] = Interlocked.Add(ref CurrentId, 1).ToString();
+                return isAsync ? Task.FromResult(data.Data) : data.Data;
             }
         }
 

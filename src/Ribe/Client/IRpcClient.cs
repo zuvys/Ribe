@@ -7,8 +7,8 @@ namespace Ribe.Client
 {
     public interface IRpcClient : IDisposable
     {
-        Task<string> SendRequestAsync(RemoteCallMessage message);
+        Task<long> SendRequestAsync(RemoteCallMessage message);
 
-        Task<Message> GetReponseAsync(string requestId);
+        Task<Message> GetReponseAsync(long requestId);
     }
 }
