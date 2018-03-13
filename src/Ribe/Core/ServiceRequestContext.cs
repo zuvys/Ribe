@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Ribe.Core
 {
-    public class ServiceContext
+    public class ServiceRequestContext
     {
         public Message Message { get; }
 
@@ -18,7 +18,7 @@ namespace Ribe.Core
 
         public IMessageSender Response { get; internal set; }
 
-        public ServiceContext(Message message, Func<Type[], byte[], object[]> paramtersValueConvertor)
+        public ServiceRequestContext(Message message, Func<Type[], byte[], object[]> paramtersValueConvertor)
         {
             Message = message;
             ParamterValuesConvertor = paramtersValueConvertor;

@@ -85,7 +85,7 @@ namespace Ribe.DotNetty.Client
         {
             var endPoint = new IPEndPoint(IPAddress.Parse(address.Ip), address.Port);
             var channel = _bootstrap.ConnectAsync(endPoint).Result;
-            var sender = new DotNettyClientMessageSender(channel, _serializerProvider);
+            var sender = new DotNettyRequestMessageSender(channel, _serializerProvider);
 
             return new RpcClient(sender, _map);
         }

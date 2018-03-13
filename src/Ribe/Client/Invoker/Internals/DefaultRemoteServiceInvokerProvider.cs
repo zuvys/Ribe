@@ -1,7 +1,4 @@
 ﻿using Ribe.Core.Service.Address;
-using Ribe.Infrustructure;
-using Ribe.Serialize;
-using System;
 
 namespace Ribe.Client.Invoker.Internals
 {
@@ -17,7 +14,7 @@ namespace Ribe.Client.Invoker.Internals
         public IRemoteServiceInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new DefaultRemoteServiceInvoker(_clientFacotry)
+            return new DefaultRemoteServiceInvoker(_clientFacotry, null)
             {
                 ServiceAddress = new ServiceAddress()
                 {

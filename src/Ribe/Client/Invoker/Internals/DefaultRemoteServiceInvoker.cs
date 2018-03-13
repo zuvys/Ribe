@@ -37,7 +37,7 @@ namespace Ribe.Client.Invoker.Internals
 
             using (var client = _clientFacotry.CreateClient(ServiceAddress))
             {
-                var id = await client.SendRequestAsync(new RemoteCallMessage(options, paramterValues));
+                var id = await client.SendRequestAsync(new RequestMessage(options, paramterValues));
 
                 var message = await client.GetReponseAsync(id);
                 if (message == null)

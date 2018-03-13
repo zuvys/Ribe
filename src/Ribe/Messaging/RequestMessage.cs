@@ -2,13 +2,13 @@
 
 namespace Ribe.Messaging
 {
-    public class RemoteCallMessage
+    public class RequestMessage
     {
         public Dictionary<string, string> Headers { get; set; }
 
         public object[] ParamterValues { get; set; }
 
-        public RemoteCallMessage(Dictionary<string, string> headers, object[] paramterValues)
+        public RequestMessage(Dictionary<string, string> headers, object[] paramterValues)
         {
             Headers = headers;
             ParamterValues = paramterValues;

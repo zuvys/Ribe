@@ -1,11 +1,10 @@
 ﻿using Ribe.Core;
-using Ribe.Json.Messaging;
 using System;
 
 namespace Ribe.Messaging
 {
     /// <summary>
-    /// an interface can convert <see cref="Message"/> to<see cref="Result"/> and <see cref="ServiceContext"/>
+    /// an interface can convert <see cref="Message"/> to<see cref="Result"/> and <see cref="ServiceRequestContext"/>
     /// </summary>
     public interface IMessageConvertor
     {
@@ -13,6 +12,6 @@ namespace Ribe.Messaging
 
         Result ConvertToResult(Message message, Type valueType);
 
-        ServiceContext ConvertToServiceContext(Message message, Type[] paramterTypes);
+        ServiceRequestContext ConvertToRequestContext(Message message, Type[] paramterTypes);
     }
 }

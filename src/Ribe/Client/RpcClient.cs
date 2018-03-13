@@ -10,7 +10,7 @@ namespace Ribe.Client
     {
         private static long IdSeed;
 
-        private IClientMessageSender _sender;
+        private IRequestMessageSender _sender;
 
         private ConcurrentDictionary<long, TaskCompletionSource<Message>> _map;
 
@@ -20,7 +20,7 @@ namespace Ribe.Client
         }
 
         public RpcClient(
-            IClientMessageSender sender,
+            IRequestMessageSender sender,
             ConcurrentDictionary<long, TaskCompletionSource<Message>> map)
         {
             if (_sender == null)
@@ -37,7 +37,7 @@ namespace Ribe.Client
             _map = map;
         }
 
-        public async Task<long> SendRequestAsync(RemoteCallMessage message)
+        public async Task<long> SendRequestAsync(RequestMessage message)
         {
             var id = Interlocked.Add(ref IdSeed, 1);
 

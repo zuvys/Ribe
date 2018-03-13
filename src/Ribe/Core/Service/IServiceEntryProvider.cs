@@ -6,6 +6,6 @@ namespace Ribe.Core.Service
 {
     public interface IServiceEntryProvider
     {
-        ServiceEntry GetServiceEntry(ServiceContext context);
+        ServiceEntry GetServiceEntry(ServiceRequestContext context);
     }
 }

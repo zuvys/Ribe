@@ -9,22 +9,24 @@ namespace Ribe.Core
 
     public interface IServerInvokerFacotry
     {
-        IServiceInvoker CreateInvoker(ServiceContext context);
+        IServiceInvoker CreateInvoker(ServiceRequestContext context);
     }
 
     public class DefaultServiceInvokerFacotry : IServerInvokerFacotry
     {
-        public IServiceInvoker CreateInvoker(ServiceContext context)
+        public IServiceInvoker CreateInvoker(ServiceRequestContext context)
         {
-            throw new System.NotImplementedException();
+            return new DefaultServiceInvoker(context);
         }
     }
 
     public class DefaultServiceInvoker : IServiceInvoker
     {
-        public DefaultServiceInvoker(ServiceContext context)
-        {
+        public ServiceRequestContext Context { get; }
 
+        public DefaultServiceInvoker(ServiceRequestContext context)
+        {
+            Context = context;
         }
 
         public Task InvokeAsync()

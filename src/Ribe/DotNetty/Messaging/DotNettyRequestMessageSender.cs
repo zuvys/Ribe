@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Messaging
 {
-    public class DotNettyClientMessageSender : DotNettyMessageSender, IClientMessageSender, IDisposable
+    public class DotNettyRequestMessageSender : DotNettyMessageSender, IRequestMessageSender, IDisposable
     {
         private ISerializerProvider _serializerProvider;
 
-        public DotNettyClientMessageSender(IChannel channel, ISerializerProvider serializerProvider)
+        public DotNettyRequestMessageSender(IChannel channel, ISerializerProvider serializerProvider)
             : base(channel)
         {
             _serializerProvider = serializerProvider ?? throw new NullReferenceException(nameof(serializerProvider));
         }
 
-        public Task SendAsync(RemoteCallMessage message)
+        public Task SendAsync(RequestMessage message)
         {
             var serializer = _serializerProvider.GetSerializer(message.Headers[Constants.ContentType]);
             if (serializer == null)

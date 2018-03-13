@@ -41,9 +41,9 @@ namespace Ribe.Json.Messaging
             return entry;
         }
 
-        public ServiceContext ConvertToServiceContext(Message message, Type[] paramterTypes)
+        public ServiceRequestContext ConvertToRequestContext(Message message, Type[] paramterTypes)
         {
-            return new ServiceContext(message, null);
+            return new ServiceRequestContext(message, null);
         }
     }
 }
