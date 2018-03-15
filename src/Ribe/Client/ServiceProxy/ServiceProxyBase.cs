@@ -15,29 +15,29 @@ namespace Ribe.Client.ServiceProxy
 
         protected ServiceProxyOption Options { get; }
 
-        protected IRemoteServiceInvokerProvider ServiceInvokerProvider { get; }
+        protected IRpcInvokerProvider RequestHandlerProvider { get; }
 
         static ServiceProxyBase()
         {
             RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(RemoteCall), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        public ServiceProxyBase(IRemoteServiceInvokerProvider invokerProvider, ServiceProxyOption options)
+        public ServiceProxyBase(IRpcInvokerProvider requestHandlerProvider, ServiceProxyOption options)
         {
-            ServiceInvokerProvider = invokerProvider;
+            RequestHandlerProvider = requestHandlerProvider;
             Options = options;
         }
 
         protected object RemoteCall(string methodKey, Type valueType, object[] paramterValues)
         {
             var options = Options.Clone(new[] { new KeyValuePair<string, string>(Constants.ServiceMethodKey, methodKey) });
-            var invoker = ServiceInvokerProvider.GetInvoker();
-            if (invoker == null)
+            var handler = RequestHandlerProvider.GetInvoker();
+            if (handler == null)
             {
-                throw new RpcServerException("get the IServiceInvoker failed!");
+                throw new RpcServerException("get RequestHandler failed!");
             }
 
-            return invoker.InvokeAsync(valueType, paramterValues, options).Result;
+            return handler.InvokeAsync(valueType, paramterValues, options).Result;
         }
     }
 }

@@ -2,8 +2,10 @@
 
 namespace Ribe.Core.Executor
 {
-    public interface IServceExecutor
+    public interface IServiceExecutor
     {
         Task<object> ExecuteAsync(ExecutionContext context);
     }
+
+    //IRequestHandler
 }

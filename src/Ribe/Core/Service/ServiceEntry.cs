@@ -1,5 +1,4 @@
-﻿using Ribe.Messaging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Ribe.Core.Service
@@ -14,16 +13,6 @@ namespace Ribe.Core.Service
 
         public ServiceAttribute Attribute { get; set; }
 
-        public Dictionary<string, ServiceMethod> ServiceMethodMap { get; set; }
-
-        public ServiceMethod GetServiceMethod(ServiceRequestContext context)
-        {
-            if (ServiceMethodMap.ContainsKey(context.ServiceMethodKey))
-            {
-                return ServiceMethodMap[context.ServiceMethodKey];
-            }
-
-            return null;
-        }
+        public Dictionary<string, ServiceMethod> MethodMap { get; set; }
     }
 }

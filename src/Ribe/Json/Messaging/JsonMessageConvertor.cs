@@ -25,7 +25,7 @@ namespace Ribe.Json.Messaging
             return message.Headers.GetValueOrDefault(Constants.ContentType).ToLower() == "json";
         }
 
-        public Result ConvertToResult(Message message, Type valueType)
+        public Result ConvertToResponse(Message message, Type valueType)
         {
             if (message == null)
             {
@@ -41,9 +41,25 @@ namespace Ribe.Json.Messaging
             return entry;
         }
 
-        public ServiceRequestContext ConvertToRequestContext(Message message, Type[] paramterTypes)
+        public Request ConvertToRequest(Message message)
         {
-            return new ServiceRequestContext(message, null);
+            return new Request(message.Content, message.Headers, (parameterTypes) =>
+            {
+                if (parameterTypes == null || parameterTypes.Length == 0)
+                {
+                    return null;
+                }
+
+                var parameterValues = new object[parameterTypes.Length];
+                var jsonValues = _serializer.DeserializeObject<object[]>(message.Content);
+
+                for (var i = 0; i < parameterTypes.Length; i++)
+                {
+                    parameterValues[i] = _serializer.DeserializeObject(jsonValues[i].ToString(), parameterTypes[i]);
+                }
+
+                return parameterValues;
+            });
         }
     }
 }

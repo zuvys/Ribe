@@ -40,11 +40,11 @@ namespace Ribe.Core.Service.Internals
                     Attribute = attr,
                     Interface = def,
                     Implemention = serviceType,
-                    ServiceMethodMap = _serviceMethodMapFactory.CreateMethodMap(def, serviceType),
+                    MethodMap = _serviceMethodMapFactory.CreateMethodMap(def, serviceType),
                     ServicePath = _servicePathFacotry.CreatePath(def, attr)
                 };
 
-                if (service.ServiceMethodMap.Count == 0)
+                if (service.MethodMap.Count == 0)
                 {
                     continue;
                 }

@@ -2,19 +2,19 @@
 
 namespace Ribe.Client.Invoker.Internals
 {
-    public class DefaultRemoteServiceInvokerProvider : IRemoteServiceInvokerProvider
+    public class RpcInvokerProvider : IRpcInvokerProvider
     {
         private IRpcClientFacotry _clientFacotry;
 
-        public DefaultRemoteServiceInvokerProvider(IRpcClientFacotry clientFacotry)
+        public RpcInvokerProvider(IRpcClientFacotry clientFacotry)
         {
             _clientFacotry = clientFacotry;
         }
 
-        public IRemoteServiceInvoker GetInvoker()
+        public IRpcInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new DefaultRemoteServiceInvoker(_clientFacotry, null)
+            return new RpcInvoker(_clientFacotry, null)
             {
                 ServiceAddress = new ServiceAddress()
                 {

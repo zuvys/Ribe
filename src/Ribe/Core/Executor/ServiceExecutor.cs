@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Ribe.Core.Executor
 {
-    public class ServiceExecutor : IServceExecutor
+    public class ServiceExecutor : IServiceExecutor
     {
         private ILogger<ServiceExecutor> _logger;
 

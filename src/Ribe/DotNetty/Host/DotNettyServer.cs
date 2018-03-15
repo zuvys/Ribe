@@ -49,7 +49,7 @@ namespace Ribe.DotNetty.Host
                         pipe.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
                         pipe.AddLast(new ChannelDecoderAdapter(new DecoderProvider(new[] { new JsonDecoder() })));
                         pipe.AddLast(new ChannelEncoderAdapter(new EncoderProvider(new[] { new JsonEncoder() })));
-                        pipe.AddLast(new ChannelServerHandlerAdapter(null, null));
+                        pipe.AddLast(new ChannelServerHandlerAdapter(null, null,null));
                     }));
 
                 _channel = await bootstrap.BindAsync(8080);

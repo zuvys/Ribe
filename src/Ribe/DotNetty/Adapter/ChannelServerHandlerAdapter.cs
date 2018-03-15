@@ -1,26 +1,30 @@
 ﻿using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
 using Ribe.Core;
+using Ribe.Core.Executor;
 using Ribe.DotNetty.Messaging;
 using Ribe.Messaging;
+using Ribe.Serialize;
 
 namespace Ribe.DotNetty.Adapter
 {
     public class ChannelServerHandlerAdapter : ChannelHandlerAdapter
     {
-        private IServerInvokerFacotry _serviceInvokerFacotry;
-
-        private IMessageConvertorProvider _convertorProvider;
+        private IMessageConvertorProvider _messageConvertorProvider;
 
         private ILogger<ChannelClientHandlerAdapter> _logger;
 
+        private ISerializerProvider _serializerProvider;
+
         public ChannelServerHandlerAdapter(
-            IServerInvokerFacotry serviceInvokerFacotry,
-            IMessageConvertorProvider convertorProvider,
-            ILogger<ChannelClientHandlerAdapter> logger)
+            ISerializerProvider serializerProvider,
+            IMessageConvertorProvider messageConvertorProvider,
+            ILogger<ChannelClientHandlerAdapter> logger
+        )
         {
-            _serviceInvokerFacotry = serviceInvokerFacotry;
-            _convertorProvider = convertorProvider;
+            _logger = logger;
+            _serializerProvider = serializerProvider;
+            _messageConvertorProvider = messageConvertorProvider;
         }
 
         public async override void ChannelRead(IChannelHandlerContext context, object msg)
@@ -28,8 +32,8 @@ namespace Ribe.DotNetty.Adapter
             var message = (Message)msg;
             if (message != null)
             {
-                var convertor = _convertorProvider.GetConvertor(message);
-                var sender = new DotNettyResponseMessageSender(context.Channel, null);
+                var convertor = _messageConvertorProvider.GetConvertor(message);
+                var sender = new DotNettyResponseMessageSender(context.Channel, _serializerProvider);
 
                 if (convertor == null)
                 {
@@ -37,19 +41,13 @@ namespace Ribe.DotNetty.Adapter
                         _logger.LogDebug("the message cannot convert to ServiceContext!", message.Headers[Constants.RequestId]);
 
                     await sender.SendAsync(new ResponseMessage(
-                            message.Headers, 
+                            message.Headers,
                             Result.Failed("the service invoke is failed!")
                             )
                         );
                 }
 
-                var ctx = convertor.ConvertToRequestContext(message, null);
-                if (ctx != null)
-                {
-                    ctx.Response = new DotNettyMessageSender(context.Channel);
-                }
-
-                await _serviceInvokerFacotry.CreateInvoker(ctx).InvokeAsync();
+                var request = convertor.ConvertToRequest(message);
             }
         }
     }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 namespace Ribe.Client.Invoker.Internals
 {
     /// <summary>
-    /// default <see cref="IRemoteServiceInvoker"/> 
+    /// default <see cref="IRpcInvoker"/> 
     /// </summary>
-    public class DefaultRemoteServiceInvoker : IRemoteServiceInvoker
+    public class RpcInvoker : IRpcInvoker
     {
         private IRpcClientFacotry _clientFacotry;
 
@@ -16,7 +16,7 @@ namespace Ribe.Client.Invoker.Internals
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        public DefaultRemoteServiceInvoker(IRpcClientFacotry clientFacotry, IMessageConvertorProvider convetorProvider)
+        public RpcInvoker(IRpcClientFacotry clientFacotry, IMessageConvertorProvider convetorProvider)
         {
             _clientFacotry = clientFacotry;
             _convertorProvider = convetorProvider;
@@ -37,9 +37,7 @@ namespace Ribe.Client.Invoker.Internals
 
             using (var client = _clientFacotry.CreateClient(ServiceAddress))
             {
-                var id = await client.SendRequestAsync(new RequestMessage(options, paramterValues));
-
-                var message = await client.GetReponseAsync(id);
+                var message = await client.SendAsync(new RequestMessage(options, paramterValues));
                 if (message == null)
                 {
                     throw new NullReferenceException(nameof(message));
@@ -51,15 +49,15 @@ namespace Ribe.Client.Invoker.Internals
                     throw new NotSupportedException("not supported!");
                 }
 
-                var data = convertor.ConvertToResult(message, dataType);
+                var data = convertor.ConvertToResponse(message, dataType);
                 if (data == null)
                 {
-                    throw new RpcServerException("return value is null", id);
+                    throw new RpcServerException("return value is null");
                 }
 
                 if (!string.IsNullOrEmpty(data.Error))
                 {
-                    throw new RpcServerException(data.Error, id);
+                    throw new RpcServerException(data.Error);
                 }
 
                 if (isVoid)

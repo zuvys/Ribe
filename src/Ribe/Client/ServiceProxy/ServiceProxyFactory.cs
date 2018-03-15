@@ -1,10 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Ribe.Client.Invoker;
+﻿using Ribe.Client.Invoker;
 using Ribe.Core.Service;
-using Ribe.Core.Service.Internals;
-using Ribe.DotNetty.Client;
-using Ribe.Messaging;
-using Ribe.Serialize;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -13,7 +8,7 @@ using System.Reflection.Emit;
 
 namespace Ribe.Client.ServiceProxy
 {
-    public class DefaultServiceProxyFactory : IServiceProxyFactory
+    public class ServiceProxyFactory : IServiceProxyFactory
     {
         const string AssemblyName = "Ribe_Client_Proxy";
 
@@ -29,9 +24,9 @@ namespace Ribe.Client.ServiceProxy
 
         private IServiceMethodKeyFactory _serviceMethodKeyFactory;
 
-        private IRemoteServiceInvokerProvider _serviceInvokerProvider;
+        private IRpcInvokerProvider _requestHandlerProvider;
 
-        static DefaultServiceProxyFactory()
+        static ServiceProxyFactory()
         {
             AssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(AssemblyName), AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder = AssemblyBuilder.DefineDynamicModule(ModuleName);
@@ -43,12 +38,12 @@ namespace Ribe.Client.ServiceProxy
         /// </summary>
         /// <param name="serviceInvokerProvider"></param>
         /// <param name="serviceMethodKeyFactory"></param>
-        public DefaultServiceProxyFactory(
-            IRemoteServiceInvokerProvider serviceInvokerProvider,
+        public ServiceProxyFactory(
+            IRpcInvokerProvider requestHandlerProvider,
             IServiceMethodKeyFactory serviceMethodKeyFactory
         )
         {
-            _serviceInvokerProvider = serviceInvokerProvider;
+            _requestHandlerProvider = requestHandlerProvider;
             _serviceMethodKeyFactory = serviceMethodKeyFactory;
         }
 
@@ -68,7 +63,7 @@ namespace Ribe.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(IRemoteServiceInvokerProvider), typeof(ServiceProxyOption) };
+                var ctorTypes = new[] { typeof(IRpcInvokerProvider), typeof(ServiceProxyOption) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,
@@ -126,7 +121,7 @@ namespace Ribe.Client.ServiceProxy
 
             //TODO:ServicePath在服务端生成
             options[Constants.ServicePath] = $"/{ options[Constants.Group]}/{ type.Namespace + "." + type.Name}/{options[Constants.Version]}/";
-            return (TService)Activator.CreateInstance(proxy, _serviceInvokerProvider, options);
+            return (TService)Activator.CreateInstance(proxy, _requestHandlerProvider, options);
         }
     }
 }

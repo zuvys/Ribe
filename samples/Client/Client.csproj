@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ribe.DotNetty\Ribe.DotNetty.csproj" />
-    <ProjectReference Include="..\..\src\Ribe.Json\Ribe.Json.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.DotNetty\Ribe.Transport.DotNetty.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.Json\Ribe.Codecs.Json.csproj" />
     <ProjectReference Include="..\..\src\Ribe\Ribe.csproj" />
     <ProjectReference Include="..\ServiceInterfaces\ServiceInterfaces.csproj" />
   </ItemGroup>

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ribe.Json\Ribe.Json.csproj" />
+    <ProjectReference Include="..\Ribe.Json\Ribe.Codecs.Json.csproj" />
     <ProjectReference Include="..\Ribe\Ribe.csproj" />
   </ItemGroup>
 

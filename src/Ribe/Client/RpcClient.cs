@@ -37,18 +37,14 @@ namespace Ribe.Client
             _map = map;
         }
 
-        public async Task<long> SendRequestAsync(RequestMessage message)
+        public async Task<Message> SendAsync(RequestMessage request)
         {
             var id = Interlocked.Add(ref IdSeed, 1);
 
-            message.Headers[Constants.RequestId] = id.ToString();
+            request.Headers[Constants.RequestId] = id.ToString();
 
-            await _sender.SendAsync(message);
-            return id;
-        }
+            await _sender.SendAsync(request);
 
-        public async Task<Message> GetReponseAsync(long id)
-        {
             return await _map.GetOrAdd(id, (k) => new TaskCompletionSource<Message>()).Task;
         }
 

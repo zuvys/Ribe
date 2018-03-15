@@ -22,11 +22,11 @@ namespace Client
                 new LoggerFactory().CreateLogger("DefaultServiceMethodKeyFactory")
             );
 
-            var serviceInvokerProvider = new DefaultRemoteServiceInvokerProvider(
+            var serviceInvokerProvider = new RpcInvokerProvider(
                 clientFacotry
             );
 
-            var factory = new DefaultServiceProxyFactory(serviceInvokerProvider, serviceMethodKeyFacotry);
+            var factory = new ServiceProxyFactory(serviceInvokerProvider, serviceMethodKeyFacotry);
 
             var proxy = factory.CreateProxy<IShopService>(
                 () => new ServiceProxyOption().WithVersion("0.0.2"));
