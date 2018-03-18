@@ -1,10 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
+using Ribe.Codecs;
 using Ribe.Core.Service;
 using Ribe.Core.Service.Internals;
-using Ribe.DotNetty;
 using Ribe.DotNetty.Host;
-using System;
+using Ribe.Messaging.Internal;
+using Ribe.Rpc.Json.Codecs;
+using Ribe.Rpc.Json.Messaging;
+using Ribe.Rpc.Json.Serialize;
+using Ribe.Serialize;
 using ServiceInterface;
+using System;
 
 namespace Client
 {
@@ -31,7 +36,12 @@ namespace Client
                 cache.AddOrUpdate(item);
             }
 
-            new DotNettyServer(cache).StartAsync().Wait();
+            new DotNettyServer(cache,
+                new EncoderProvider(new[] { new JsonEncoder() }),
+                new DecoderProvider(new[] { new JsonDecoder() }),
+                new DefaultMessageConvertorProvider(new[] { new JsonMessageConvertor() }),
+                new SerializerProvider(new[] { JsonSerializer.Default })
+                ).StartAsync().Wait();
             Console.ReadLine();
         }
     }

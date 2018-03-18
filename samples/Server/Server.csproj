@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ribe.DotNetty\Ribe.Transport.DotNetty.csproj" />
-    <ProjectReference Include="..\..\src\Ribe.Json\Ribe.Codecs.Json.csproj" />
-    <ProjectReference Include="..\..\src\Ribe\Ribe.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.DotNetty\Ribe.Rpc.DotNetty.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.Json\Ribe.Rpc.Json.csproj" />
+    <ProjectReference Include="..\..\src\Ribe\Ribe.Rpc.csproj" />
     <ProjectReference Include="..\ServiceInterfaces\ServiceInterfaces.csproj" />
   </ItemGroup>
 

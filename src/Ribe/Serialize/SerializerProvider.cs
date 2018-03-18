@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Ribe.Serialize.Internal
+namespace Ribe.Serialize
 {
     public class SerializerProvider : ISerializerProvider
     {
@@ -14,7 +15,7 @@ namespace Ribe.Serialize.Internal
 
         public ISerializer GetSerializer(string formatType)
         {
-            return _serializers.FirstOrDefault(i => i.FormatType == formatType);
+            return _serializers.FirstOrDefault(i =>string.Equals( i.FormatType,formatType,StringComparison.OrdinalIgnoreCase));
         }
     }
 }

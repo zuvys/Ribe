@@ -21,7 +21,7 @@ namespace Ribe.Core
             _serviceEntryProvider = serviceEntryProvider;
         }
 
-        public Task<Result> HandleRequestAsync(Request request)
+        public Task<Response> HandleRequestAsync(Request request)
         {
             var serviceEntry = _serviceEntryProvider.GetServiceEntry(request);
             if (serviceEntry == null)
@@ -47,11 +47,11 @@ namespace Ribe.Core
 
             try
             {
-                return Task.FromResult(Result.Ok(_serviceExecutor.ExecuteAsync(context)));
+                return Task.FromResult(Response.Ok(_serviceExecutor.ExecuteAsync(context)));
             }
             catch (Exception e)
             {
-                return Task.FromResult(Result.Failed(e.Message));
+                return Task.FromResult(Response.Failed(e.Message));
             }
         }
     }

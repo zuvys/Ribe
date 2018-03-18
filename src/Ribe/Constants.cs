@@ -19,6 +19,10 @@
 
         public const string ServiceMethodKey = "Service_Method_Key";
 
+        public const string RequestKey = "Service_Request";
+
+        public const string ResponseKey = "Service_Response";
+
         public const string DefaultGroup = "default";
 
         public const string DefaultVersion = "0.0.1";

@@ -1,4 +1,5 @@
 ﻿using Ribe.Core.Service.Address;
+using Ribe.Messaging;
 
 namespace Ribe.Client.Invoker.Internals
 {
@@ -6,15 +7,18 @@ namespace Ribe.Client.Invoker.Internals
     {
         private IRpcClientFacotry _clientFacotry;
 
-        public RpcInvokerProvider(IRpcClientFacotry clientFacotry)
+        private IMessageConvertorProvider _messageConvetorProvider;
+
+        public RpcInvokerProvider(IRpcClientFacotry clientFacotry, IMessageConvertorProvider messageConvetorProvider)
         {
             _clientFacotry = clientFacotry;
+            _messageConvetorProvider = messageConvetorProvider;
         }
 
         public IRpcInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new RpcInvoker(_clientFacotry, null)
+            return new RpcInvoker(_clientFacotry, _messageConvetorProvider)
             {
                 ServiceAddress = new ServiceAddress()
                 {

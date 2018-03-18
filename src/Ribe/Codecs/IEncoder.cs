@@ -4,7 +4,7 @@ namespace Ribe.Codecs
 {
     public interface IEncoder
     {
-        bool CanEncode(string encodingFormat);
+        bool CanEncode(string formatType);
 
         byte[] Encode(Message message);
     }

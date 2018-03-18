@@ -4,7 +4,7 @@ namespace Ribe.Codecs
 {
     public interface IDecoder
     {
-        bool CanDecode(string encodingFormat);
+        bool CanDecode(string formatType);
 
         Message Decode(byte[] bytes);
     }

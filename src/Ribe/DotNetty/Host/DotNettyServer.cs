@@ -5,13 +5,12 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Ribe.Codecs;
-using Ribe.Core.Executor;
-using Ribe.Core.Executor.Internals;
 using Ribe.Core.Service;
-using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Adapter;
 using Ribe.Host;
-using Ribe.Json.Codecs;
+using Ribe.Messaging;
+using Ribe.Messaging.Internal;
+using Ribe.Serialize;
 using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Host
@@ -22,9 +21,26 @@ namespace Ribe.DotNetty.Host
 
         private ServiceEntryCache _cache;
 
-        public DotNettyServer(ServiceEntryCache cahche)
+        private IEncoderProvider _encoderProvider;
+
+        private IDecoderProvider _decoderProvider;
+
+        private ISerializerProvider _serializerProvider;
+
+        private IMessageConvertorProvider _messageConvertorProvider;
+
+        public DotNettyServer(
+            ServiceEntryCache cahche,
+            IEncoderProvider encoderProvider,
+            IDecoderProvider decoderProvider,
+            IMessageConvertorProvider messageConvertorProvider,
+            ISerializerProvider serializerProvider)
         {
             _cache = cahche;
+            _encoderProvider = encoderProvider;
+            _decoderProvider = decoderProvider;
+            _messageConvertorProvider = messageConvertorProvider;
+            _serializerProvider = serializerProvider;
         }
 
         public async Task StartAsync()
@@ -47,9 +63,12 @@ namespace Ribe.DotNetty.Host
 
                         pipe.AddLast(new LengthFieldPrepender(4));
                         pipe.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                        pipe.AddLast(new ChannelDecoderAdapter(new DecoderProvider(new[] { new JsonDecoder() })));
-                        pipe.AddLast(new ChannelEncoderAdapter(new EncoderProvider(new[] { new JsonEncoder() })));
-                        pipe.AddLast(new ChannelServerHandlerAdapter(null, null,null));
+                        pipe.AddLast(new ChannelDecoderAdapter(_decoderProvider));
+                        pipe.AddLast(new ChannelEncoderAdapter(_encoderProvider));
+                        pipe.AddLast(new ChannelServerHandlerAdapter(
+                            _serializerProvider,
+                            _messageConvertorProvider,
+                            new LoggerFactory().CreateLogger<ChannelServerHandlerAdapter>()));
                     }));
 
                 _channel = await bootstrap.BindAsync(8080);

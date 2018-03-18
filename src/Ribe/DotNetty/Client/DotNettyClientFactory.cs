@@ -8,7 +8,6 @@ using Ribe.Codecs;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
 using Ribe.DotNetty.Messaging;
-using Ribe.Json.Codecs;
 using Ribe.Messaging;
 using Ribe.Serialize;
 using System;
@@ -29,7 +28,11 @@ namespace Ribe.DotNetty.Client
 
         private ISerializerProvider _serializerProvider;
 
-        public DotNettyClientFactory(ISerializerProvider serializerProvider)
+        public DotNettyClientFactory(
+            ISerializerProvider serializerProvider,
+            IEncoderProvider encoderProvider,
+            IDecoderProvider decoderProvider
+            )
         {
             _serializerProvider = serializerProvider;
 
@@ -45,8 +48,8 @@ namespace Ribe.DotNetty.Client
                     pip.AddLast(new LoggingHandler());
                     pip.AddLast(new LengthFieldPrepender(4));
                     pip.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                    pip.AddLast(new ChannelDecoderAdapter(new DecoderProvider(new[] { new JsonDecoder() })));
-                    pip.AddLast(new ChannelEncoderAdapter(new EncoderProvider(new[] { new JsonEncoder() })));
+                    pip.AddLast(new ChannelDecoderAdapter(decoderProvider));
+                    pip.AddLast(new ChannelEncoderAdapter(encoderProvider));
                     pip.AddLast(new ChannelClientHandlerAdapter((message) =>
                     {
                         if (message == null)

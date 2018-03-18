@@ -1,13 +1,16 @@
 ﻿using Newtonsoft.Json;
 using Ribe.Serialize;
+
 using System;
 using System.Text;
 
-namespace Ribe.Json.Serialize
+namespace Ribe.Rpc.Json.Serialize
 {
     public class JsonSerializer : ISerializer
     {
         public string FormatType => "json";
+
+        public static JsonSerializer Default = new JsonSerializer();
 
         public byte[] SerializeObject(object value)
         {

@@ -35,7 +35,7 @@ namespace Ribe.Client.Invoker.Internals
             var isAsync = IsAsyncCall(valueType);
             var dataType = isAsync && !isVoid ? valueType.GetGenericArguments()[0] : valueType;
 
-            using (var client = _clientFacotry.CreateClient(ServiceAddress))
+            var client = _clientFacotry.CreateClient(ServiceAddress);
             {
                 var message = await client.SendAsync(new RequestMessage(options, paramterValues));
                 if (message == null)

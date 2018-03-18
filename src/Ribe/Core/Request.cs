@@ -5,15 +5,15 @@ namespace Ribe.Core
 {
     public class Request
     {
-        private Func<Type[], object[]> _paramterValuesProvider;
+        public byte[] Body { get; }
 
         public Dictionary<string, string> Headers { get; }
-
-        public byte[] Body { get; }
 
         public string ServicePath => Headers.GetValueOrDefault(Constants.ServicePath);
 
         public string ServiceMethodKey => Headers.GetValueOrDefault(Constants.ServiceMethodKey);
+
+        private Func<Type[], object[]> _paramterValuesProvider;
 
         public Request(
             byte[] body,

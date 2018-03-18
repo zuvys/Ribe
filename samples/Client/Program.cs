@@ -3,9 +3,14 @@ using Ribe.Client;
 using Ribe.Client.Extensions;
 using Ribe.Client.Invoker.Internals;
 using Ribe.Client.ServiceProxy;
+using Ribe.Codecs;
 using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Client;
-using Ribe.Json.Serialize;
+using Ribe.Messaging.Internal;
+using Ribe.Rpc.Json.Codecs;
+using Ribe.Rpc.Json.Messaging;
+using Ribe.Rpc.Json.Serialize;
+using Ribe.Serialize;
 using ServiceInterfaces;
 using System;
 
@@ -16,14 +21,28 @@ namespace Client
         static void Main(string[] args)
         {
             var serializer = new JsonSerializer();
-            var clientFacotry = new DotNettyClientFactory(null);
+            var clientFacotry = new DotNettyClientFactory(new SerializerProvider(
+                new[] { new JsonSerializer() }
+                ),
+                new EncoderProvider(new[] {
+                   new JsonEncoder()
+               }),
+                new DecoderProvider(
+                    new[] { new JsonDecoder() }
+                    )
+               );
 
             var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(
                 new LoggerFactory().CreateLogger("DefaultServiceMethodKeyFactory")
             );
 
             var serviceInvokerProvider = new RpcInvokerProvider(
-                clientFacotry
+                clientFacotry,
+                new DefaultMessageConvertorProvider(
+                    new[] {
+                        new JsonMessageConvertor()
+                    }
+                    )
             );
 
             var factory = new ServiceProxyFactory(serviceInvokerProvider, serviceMethodKeyFacotry);

@@ -4,9 +4,9 @@ namespace Ribe.Messaging
 {
     public class RequestMessage
     {
-        public Dictionary<string, string> Headers { get; set; }
-
         public object[] ParamterValues { get; set; }
+
+        public Dictionary<string, string> Headers { get; set; }
 
         public RequestMessage(Dictionary<string, string> headers, object[] paramterValues)
         {

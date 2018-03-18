@@ -1,9 +1,9 @@
 ﻿namespace Ribe.Core
 {
     /// <summary>
-    /// the result of service execution
+    /// the response of service execution
     /// </summary>
-    public class Result
+    public class Response
     {
         public string Error { get; set; }
 
@@ -11,9 +11,9 @@
 
         public Status Status { get; set; }
 
-        public static Result Ok(object data)
+        public static Response Ok(object data)
         {
-            return new Result()
+            return new Response()
             {
                 Error = string.Empty,
                 Data = data,
@@ -21,9 +21,9 @@
             };
         }
 
-        public static Result Failed(string error)
+        public static Response Failed(string error)
         {
-            return new Result()
+            return new Response()
             {
                 Data = null,
                 Error = error,

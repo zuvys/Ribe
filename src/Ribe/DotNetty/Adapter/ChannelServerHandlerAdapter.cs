@@ -12,14 +12,14 @@ namespace Ribe.DotNetty.Adapter
     {
         private IMessageConvertorProvider _messageConvertorProvider;
 
-        private ILogger<ChannelClientHandlerAdapter> _logger;
+        private ILogger<ChannelServerHandlerAdapter> _logger;
 
         private ISerializerProvider _serializerProvider;
 
         public ChannelServerHandlerAdapter(
             ISerializerProvider serializerProvider,
             IMessageConvertorProvider messageConvertorProvider,
-            ILogger<ChannelClientHandlerAdapter> logger
+            ILogger<ChannelServerHandlerAdapter> logger
         )
         {
             _logger = logger;
@@ -42,12 +42,19 @@ namespace Ribe.DotNetty.Adapter
 
                     await sender.SendAsync(new ResponseMessage(
                             message.Headers,
-                            Result.Failed("the service invoke is failed!")
+                            Response.Failed("the service invoke is failed!")
                             )
                         );
                 }
 
                 var request = convertor.ConvertToRequest(message);
+
+                await sender.SendAsync(new ResponseMessage(message.Headers, new Response()
+                {
+                    Data =null,
+                    Status = Status.Success,
+                    Error = "fuck"
+                }));
             }
         }
     }

@@ -23,18 +23,8 @@ namespace Ribe.Client
             IRequestMessageSender sender,
             ConcurrentDictionary<long, TaskCompletionSource<Message>> map)
         {
-            if (_sender == null)
-            {
-                throw new NullReferenceException(nameof(_sender));
-            }
-
-            if (_map == null)
-            {
-                throw new NullReferenceException(nameof(map));
-            }
-
-            _sender = sender;
-            _map = map;
+            _sender = sender ?? throw new NullReferenceException(nameof(sender));
+            _map = map ?? throw new NullReferenceException(nameof(map));
         }
 
         public async Task<Message> SendAsync(RequestMessage request)
@@ -42,6 +32,7 @@ namespace Ribe.Client
             var id = Interlocked.Add(ref IdSeed, 1);
 
             request.Headers[Constants.RequestId] = id.ToString();
+            _map.GetOrAdd(id, (k) => new TaskCompletionSource<Message>());
 
             await _sender.SendAsync(request);
 

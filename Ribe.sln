@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ribe", "src\Ribe\Ribe.csproj", "{C630B754-6D64-4CA7-B2A1-FF6E6A71FE18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ribe.Rpc", "src\Ribe\Ribe.Rpc.csproj", "{C630B754-6D64-4CA7-B2A1-FF6E6A71FE18}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ribe.Codecs.Json", "src\Ribe.Json\Ribe.Codecs.Json.csproj", "{C5DE21EC-8427-4AF5-9E01-EDC42FAC0C36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ribe.Rpc.Json", "src\Ribe.Json\Ribe.Rpc.Json.csproj", "{C5DE21EC-8427-4AF5-9E01-EDC42FAC0C36}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ribe.Transport.DotNetty", "src\Ribe.DotNetty\Ribe.Transport.DotNetty.csproj", "{A6DDA29E-41A6-44FE-8A4D-6C737D075880}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ribe.Rpc.DotNetty", "src\Ribe.DotNetty\Ribe.Rpc.DotNetty.csproj", "{A6DDA29E-41A6-44FE-8A4D-6C737D075880}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{14FADD1E-64F0-4739-B5BC-2D310D1F7C7A}"
 EndProject

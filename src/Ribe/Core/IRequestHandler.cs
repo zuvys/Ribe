@@ -4,6 +4,6 @@ namespace Ribe.Core
 {
     public interface IRequestHandler
     {
-        Task<Result> HandleRequestAsync(Request request);
+        Task<Response> HandleRequestAsync(Request request);
     }
 }
