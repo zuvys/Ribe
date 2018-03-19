@@ -7,7 +7,6 @@ using Ribe.Client;
 using Ribe.Codecs;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
-using Ribe.DotNetty.Messaging;
 using Ribe.Messaging;
 using Ribe.Serialize;
 using System;
@@ -18,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Client
 {
-    public class DotNettyClientFactory : IRpcClientFacotry, IDisposable
+    public class DotNettyRpcClientFactory : IRpcClientFacotry, IDisposable
     {
         private Bootstrap _bootstrap;
 
@@ -28,7 +27,7 @@ namespace Ribe.DotNetty.Client
 
         private ISerializerProvider _serializerProvider;
 
-        public DotNettyClientFactory(
+        public DotNettyRpcClientFactory(
             ISerializerProvider serializerProvider,
             IEncoderProvider encoderProvider,
             IDecoderProvider decoderProvider
@@ -48,9 +47,9 @@ namespace Ribe.DotNetty.Client
                     pip.AddLast(new LoggingHandler());
                     pip.AddLast(new LengthFieldPrepender(4));
                     pip.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                    pip.AddLast(new ChannelDecoderAdapter(decoderProvider));
-                    pip.AddLast(new ChannelEncoderAdapter(encoderProvider));
-                    pip.AddLast(new ChannelClientHandlerAdapter((message) =>
+                    pip.AddLast(new DotNettyChannelDecoderHandler(decoderProvider));
+                    pip.AddLast(new DotNettyChannelEncoderHandler(encoderProvider));
+                    pip.AddLast(new DotNettyChannelClientHandler((message) =>
                     {
                         if (message == null)
                         {
@@ -88,9 +87,9 @@ namespace Ribe.DotNetty.Client
         {
             var endPoint = new IPEndPoint(IPAddress.Parse(address.Ip), address.Port);
             var channel = _bootstrap.ConnectAsync(endPoint).Result;
-            var sender = new DotNettyRequestMessageSender(channel, _serializerProvider);
+            var sender = new DotNettyClientMessageSender(channel);
 
-            return new RpcClient(sender, _map);
+            return new RpcClient(sender, _serializerProvider, _map);
         }
 
         public void Dispose()

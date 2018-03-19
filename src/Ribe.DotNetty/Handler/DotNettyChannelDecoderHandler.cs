@@ -9,11 +9,11 @@ using System.Text;
 
 namespace Ribe.DotNetty.Adapter
 {
-    public class ChannelDecoderAdapter : ByteToMessageDecoder
+    public class DotNettyChannelDecoderHandler : ByteToMessageDecoder
     {
         private IDecoderProvider _decoderProvider;
 
-        public ChannelDecoderAdapter(IDecoderProvider decoderProvider)
+        public DotNettyChannelDecoderHandler(IDecoderProvider decoderProvider)
         {
             _decoderProvider = decoderProvider;
         }

@@ -10,32 +10,25 @@ namespace Ribe.Client.Invoker.Internals
     /// </summary>
     public class RpcInvoker : IRpcInvoker
     {
-        private IRpcClientFacotry _clientFacotry;
+        private IRpcClientFacotry _clientFactory;
 
         private IMessageConvertorProvider _convertorProvider;
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        public RpcInvoker(IRpcClientFacotry clientFacotry, IMessageConvertorProvider convetorProvider)
+        public RpcInvoker(IRpcClientFacotry clientFactory, IMessageConvertorProvider convetorProvider)
         {
-            _clientFacotry = clientFacotry;
+            _clientFactory = clientFactory;
             _convertorProvider = convetorProvider;
         }
 
-        /// <summary>
-        /// Invoke Service
-        /// </summary>
-        /// <param name="valueType"></param>
-        /// <param name="paramterValues"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
         public async Task<object> InvokeAsync(Type valueType, object[] paramterValues, ServiceProxyOption options)
         {
             var isVoid = IsVoidCall(valueType);
             var isAsync = IsAsyncCall(valueType);
             var dataType = isAsync && !isVoid ? valueType.GetGenericArguments()[0] : valueType;
 
-            var client = _clientFacotry.CreateClient(ServiceAddress);
+            var client = _clientFactory.CreateClient(ServiceAddress);
             {
                 var message = await client.SendAsync(new RequestMessage(options, paramterValues));
                 if (message == null)

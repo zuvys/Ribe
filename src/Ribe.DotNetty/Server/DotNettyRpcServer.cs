@@ -3,19 +3,17 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Microsoft.Extensions.Logging;
 using Ribe.Codecs;
 using Ribe.Core.Service;
 using Ribe.DotNetty.Adapter;
-using Ribe.Host;
 using Ribe.Messaging;
-using Ribe.Messaging.Internal;
 using Ribe.Serialize;
+using Ribe.Server;
 using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Host
 {
-    public class DotNettyServer : IServer
+    public class DotNettyRpcServer : IRpcServer
     {
         private IChannel _channel;
 
@@ -27,9 +25,7 @@ namespace Ribe.DotNetty.Host
 
         private ISerializerProvider _serializerProvider;
 
-        private IMessageConvertorProvider _messageConvertorProvider;
-
-        public DotNettyServer(
+        public DotNettyRpcServer(
             ServiceEntryCache cahche,
             IEncoderProvider encoderProvider,
             IDecoderProvider decoderProvider,
@@ -39,11 +35,10 @@ namespace Ribe.DotNetty.Host
             _cache = cahche;
             _encoderProvider = encoderProvider;
             _decoderProvider = decoderProvider;
-            _messageConvertorProvider = messageConvertorProvider;
             _serializerProvider = serializerProvider;
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(int port)
         {
             var bossGroup = new MultithreadEventLoopGroup(1);
             var workerGroup = new MultithreadEventLoopGroup();
@@ -59,19 +54,14 @@ namespace Ribe.DotNetty.Host
                     .Handler(new LoggingHandler("SRV-LSTN"))
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
                     {
-                        var pipe = channel.Pipeline;
-
-                        pipe.AddLast(new LengthFieldPrepender(4));
-                        pipe.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                        pipe.AddLast(new ChannelDecoderAdapter(_decoderProvider));
-                        pipe.AddLast(new ChannelEncoderAdapter(_encoderProvider));
-                        pipe.AddLast(new ChannelServerHandlerAdapter(
-                            _serializerProvider,
-                            _messageConvertorProvider,
-                            new LoggerFactory().CreateLogger<ChannelServerHandlerAdapter>()));
+                        channel.Pipeline.AddLast(new LengthFieldPrepender(4));
+                        channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
+                        channel.Pipeline.AddLast(new DotNettyChannelDecoderHandler(_decoderProvider));
+                        channel.Pipeline.AddLast(new DotNettyChannelEncoderHandler(_encoderProvider));
+                        channel.Pipeline.AddLast(new DotNettyChannelServerHandler(null, _serializerProvider));
                     }));
 
-                _channel = await bootstrap.BindAsync(8080);
+                _channel = await bootstrap.BindAsync(port);
             }
             finally
             {

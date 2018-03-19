@@ -21,7 +21,7 @@ namespace Client
         static void Main(string[] args)
         {
             var serializer = new JsonSerializer();
-            var clientFacotry = new DotNettyClientFactory(new SerializerProvider(
+            var clientFacotry = new DotNettyRpcClientFactory(new SerializerProvider(
                 new[] { new JsonSerializer() }
                 ),
                 new EncoderProvider(new[] {

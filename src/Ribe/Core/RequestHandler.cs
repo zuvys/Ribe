@@ -15,21 +15,22 @@ namespace Ribe.Core
 
         public RequestHandler(
             IServiceExecutor serviceExecutor,
-            IServiceEntryProvider serviceEntryProvider)
+            IServiceEntryProvider serviceEntryProvider
+        )
         {
             _serviceExecutor = serviceExecutor;
             _serviceEntryProvider = serviceEntryProvider;
         }
 
-        public Task<Response> HandleRequestAsync(Request request)
+        public async Task HandleRequestAsync(Request request, Func<long, Response, Task> onCompleted)
         {
-            var serviceEntry = _serviceEntryProvider.GetServiceEntry(request);
-            if (serviceEntry == null)
+            var entry = _serviceEntryProvider.GetServiceEntry(request);
+            if (entry == null)
             {
                 throw new Exception();
             }
 
-            var method = serviceEntry.MethodMap.GetValueOrDefault(request.Headers[Constants.ServiceMethodKey]);
+            var method = entry.MethodMap.GetValueOrDefault(request.Headers[Constants.ServiceMethodKey]);
             if (method == null)
             {
                 throw new Exception();
@@ -40,18 +41,25 @@ namespace Ribe.Core
 
             var context = new ExecutionContext()
             {
-                ServiceType = serviceEntry.Implemention,
+                ServiceType = entry.Implemention,
                 ServiceMethod = method,
                 ParamterValues = parameterValues
             };
 
-            try
+            if (long.TryParse(request.Headers.GetValueOrDefault(Constants.RequestId), out long id))
             {
-                return Task.FromResult(Response.Ok(_serviceExecutor.ExecuteAsync(context)));
+                try
+                {
+                    await onCompleted(id, Response.Ok(await _serviceExecutor.ExecuteAsync(context)));
+                }
+                catch (Exception e)
+                {
+                    await onCompleted(id, Response.Failed(e.Message));
+                }
             }
-            catch (Exception e)
+            else
             {
-                return Task.FromResult(Response.Failed(e.Message));
+                throw new NotSupportedException($"the request not contains request id!");
             }
         }
     }

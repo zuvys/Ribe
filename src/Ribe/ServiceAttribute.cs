@@ -14,8 +14,6 @@ namespace Ribe.Core
 
         public string Version { get; set; }
 
-        //Route|Path|etc
-
         public ServiceAttribute()
         {
             if (String.IsNullOrEmpty(Version))

@@ -1,15 +1,14 @@
 ﻿using DotNetty.Transport.Channels;
-using Ribe.Core;
 using Ribe.Messaging;
 using System;
 
 namespace Ribe.DotNetty.Adapter
 {
-    public class ChannelClientHandlerAdapter : ChannelHandlerAdapter
+    public class DotNettyChannelClientHandler : ChannelHandlerAdapter
     {
         private Action<Message> _handler;
 
-        public ChannelClientHandlerAdapter(Action<Message> handler)
+        public DotNettyChannelClientHandler(Action<Message> handler)
         {
             _handler = handler;
         }

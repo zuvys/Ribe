@@ -36,12 +36,12 @@ namespace Client
                 cache.AddOrUpdate(item);
             }
 
-            new DotNettyServer(cache,
+            new DotNettyRpcServer(cache,
                 new EncoderProvider(new[] { new JsonEncoder() }),
                 new DecoderProvider(new[] { new JsonDecoder() }),
                 new DefaultMessageConvertorProvider(new[] { new JsonMessageConvertor() }),
                 new SerializerProvider(new[] { JsonSerializer.Default })
-                ).StartAsync().Wait();
+                ).StartAsync(8080).Wait();
             Console.ReadLine();
         }
     }
