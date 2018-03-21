@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Ribe.Client
+namespace Ribe.Core
 {
-    public class ServiceProxyOption : Dictionary<string, string>
+    public class RequestHeader : Dictionary<string, string>
     {
-        public ServiceProxyOption()
+        public RequestHeader()
         {
             this[Constants.Group] = Constants.DefaultGroup;
             this[Constants.Accept] = Constants.DefaultAccpet;
@@ -13,9 +13,9 @@ namespace Ribe.Client
             this[Constants.ContentType] = Constants.DefaultContentType;
         }
 
-        public ServiceProxyOption Clone(IEnumerable<KeyValuePair<string, string>> kvs = null)
+        public RequestHeader Clone(IEnumerable<KeyValuePair<string, string>> kvs = null)
         {
-            var options = new ServiceProxyOption();
+            var options = new RequestHeader();
 
             foreach (var option in this.Concat(kvs))
             {

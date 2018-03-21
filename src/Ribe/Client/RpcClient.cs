@@ -1,4 +1,5 @@
-﻿using Ribe.Messaging;
+﻿using Ribe.Core;
+using Ribe.Messaging;
 using Ribe.Rpc.Transport;
 using Ribe.Serialize;
 using System;
@@ -8,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace Ribe.Client
 {
-    public class RpcClient : IRpcClient
+    public class RpcClient : IDisposable
     {
-        static long Seed;
+        protected static long Seed;
 
-        private IMessageSender _sender;
+        protected IMessageSender Sender { get; }
 
-        private ISerializerProvider _serializerProvider;
+        protected ISerializerProvider SerializerProvider { get; }
 
-        private ConcurrentDictionary<long, TaskCompletionSource<Message>> _map;
+        protected ConcurrentDictionary<long, TaskCompletionSource<Message>> Map { get; }
 
         static RpcClient()
         {
@@ -28,38 +29,46 @@ namespace Ribe.Client
             ISerializerProvider serializerProvider,
             ConcurrentDictionary<long, TaskCompletionSource<Message>> map)
         {
-            _serializerProvider = serializerProvider ?? throw new NullReferenceException(nameof(serializerProvider));
-            _sender = sender ?? throw new NullReferenceException(nameof(sender));
-            _map = map ?? throw new NullReferenceException(nameof(map));
+            Map = map ?? throw new NullReferenceException(nameof(map));
+            Sender = sender ?? throw new NullReferenceException(nameof(sender));
+            SerializerProvider = serializerProvider ?? throw new NullReferenceException(nameof(serializerProvider));
         }
 
-        public async Task<Message> SendAsync(RequestMessage request)
+        public virtual async Task<Message> SendRequestAsync(RequestContext context)
         {
-            var id = Interlocked.Add(ref Seed, 1);
-            var serializer = _serializerProvider.GetSerializer(request.Headers[Constants.ContentType]);
-
+            var serializer = SerializerProvider.GetSerializer(context.RequestHeaders[Constants.ContentType]);
             if (serializer == null)
             {
-                throw new NotSupportedException($"the request content-type:{request.Headers[Constants.ContentType]} is not supported!");
+                throw new NotSupportedException($"the request content-type:{context.RequestHeaders[Constants.ContentType]} is not supported!");
             }
-            else
+
+            if (!long.TryParse(context.RequestHeaders[Constants.RequestId], out var id))
             {
-                request.Headers[Constants.RequestId] = id.ToString();
+                id = Interlocked.Add(ref Seed, 1);
+                context.RequestHeaders[Constants.RequestId] = id.ToString();
             }
 
-            var task = _map.GetOrAdd(id, (k) => new TaskCompletionSource<Message>()).Task;
+            SendMessage(new Message(
+                context.RequestHeaders,
+                serializer.SerializeObject(context.RequestParamterValues)
+            ));
 
-            await _sender.SendAsync(new Message(
-                request.Headers, 
-                serializer.SerializeObject(request.ParamterValues))
-            );
+            if (context.IsVoidRequest)
+            {
+                return null;
+            }
 
-            return await task;
+            return await Map.GetOrAdd(id, (k) => new TaskCompletionSource<Message>()).Task;
         }
 
-        public void Dispose()
+        private async void SendMessage(Message message)
         {
-            if (_sender is IDisposable dispose)
+            await Sender.SendAsync(message);
+        }
+
+        public virtual void Dispose()
+        {
+            if (Sender is IDisposable dispose)
             {
                 dispose.Dispose();
             }

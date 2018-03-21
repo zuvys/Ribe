@@ -7,6 +7,7 @@ using Ribe.Messaging.Internal;
 using Ribe.Rpc.Json.Codecs;
 using Ribe.Rpc.Json.Messaging;
 using Ribe.Rpc.Json.Serialize;
+using Ribe.Rpc.Logging;
 using Ribe.Serialize;
 using ServiceInterface;
 using System;
@@ -18,7 +19,7 @@ namespace Client
         static void Main(string[] args)
         {
             //scan
-            var logger = new LoggerFactory().CreateLogger("What");
+            var logger = new NullLogger();
             var facotry = new DefaultServiceEntryFactory(
                 new DefaultServiceEntryPathFactory(logger),
                 new DefaultServiceMethodMapFacotry(new DefaultServiceMethodKeyFactory(logger), logger),
@@ -36,12 +37,17 @@ namespace Client
                 cache.AddOrUpdate(item);
             }
 
-            new DotNettyRpcServer(cache,
+            new DotNettyServer(cache,
                 new EncoderProvider(new[] { new JsonEncoder() }),
                 new DecoderProvider(new[] { new JsonDecoder() }),
                 new DefaultMessageConvertorProvider(new[] { new JsonMessageConvertor() }),
-                new SerializerProvider(new[] { JsonSerializer.Default })
-                ).StartAsync(8080).Wait();
+                new SerializerProvider(new[] { JsonSerializer.Default }),
+                new Ribe.Core.Service.Address.ServiceAddress()
+                {
+                    Ip = "127.0.0.1",
+                    Port = 8080
+                }
+                ).StartAsync().Wait();
             Console.ReadLine();
         }
     }

@@ -5,18 +5,17 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Ribe.Codecs;
 using Ribe.Core.Service;
+using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
 using Ribe.Messaging;
+using Ribe.Rpc.Server;
 using Ribe.Serialize;
-using Ribe.Server;
 using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Host
 {
-    public class DotNettyRpcServer : IRpcServer
+    public class DotNettyServer : RpcServer
     {
-        private IChannel _channel;
-
         private ServiceEntryCache _cache;
 
         private IEncoderProvider _encoderProvider;
@@ -25,53 +24,56 @@ namespace Ribe.DotNetty.Host
 
         private ISerializerProvider _serializerProvider;
 
-        public DotNettyRpcServer(
+        private MultithreadEventLoopGroup _bossGroup;
+
+        private MultithreadEventLoopGroup _workerGroup;
+
+        public DotNettyServer(
             ServiceEntryCache cahche,
             IEncoderProvider encoderProvider,
             IDecoderProvider decoderProvider,
             IMessageConvertorProvider messageConvertorProvider,
-            ISerializerProvider serializerProvider)
+            ISerializerProvider serializerProvider,
+            ServiceAddress address
+        ) : base(address)
         {
             _cache = cahche;
             _encoderProvider = encoderProvider;
             _decoderProvider = decoderProvider;
             _serializerProvider = serializerProvider;
+
+            _bossGroup = new MultithreadEventLoopGroup(1);
+            _workerGroup = new MultithreadEventLoopGroup();
         }
 
-        public async Task StartAsync(int port)
+        public override async Task StartAsync()
         {
-            var bossGroup = new MultithreadEventLoopGroup(1);
-            var workerGroup = new MultithreadEventLoopGroup();
-
-            try
-            {
-                var bootstrap = new ServerBootstrap();
-
-                bootstrap
-                    .Group(bossGroup, workerGroup)
-                    .Channel<TcpServerSocketChannel>()
-                    .Option(ChannelOption.SoBacklog, 100)
-                    .Handler(new LoggingHandler("SRV-LSTN"))
-                    .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
-                    {
-                        channel.Pipeline.AddLast(new LengthFieldPrepender(4));
-                        channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                        channel.Pipeline.AddLast(new DotNettyChannelDecoderHandler(_decoderProvider));
-                        channel.Pipeline.AddLast(new DotNettyChannelEncoderHandler(_encoderProvider));
-                        channel.Pipeline.AddLast(new DotNettyChannelServerHandler(null, _serializerProvider));
-                    }));
-
-                _channel = await bootstrap.BindAsync(port);
-            }
-            finally
-            {
-
-            }
+            await new ServerBootstrap()
+                  .Group(_bossGroup, _workerGroup)
+                  .Channel<TcpServerSocketChannel>()
+                  .Option(ChannelOption.SoBacklog, 100)
+                  .Handler(new LoggingHandler("SRV-LSTN"))
+                  .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+                  {
+                      channel.Pipeline.AddLast(new LengthFieldPrepender(4));
+                      channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
+                      channel.Pipeline.AddLast(new DotNettyChannelDecoderHandlerAdapter(_decoderProvider));
+                      channel.Pipeline.AddLast(new DotNettyChannelEncoderHandlerAdapter(_encoderProvider));
+                      channel.Pipeline.AddLast(new DotNettyChannelServerHandlerAdapter(null, _serializerProvider));
+                  })).BindAsync(Port);
         }
 
-        public Task StopAsync()
+        public override async Task StopAsync()
         {
-            return _channel.CloseAsync();
+            if (_bossGroup != null)
+            {
+                await _bossGroup.ShutdownGracefullyAsync();
+            }
+
+            if (_workerGroup != null)
+            {
+                await _workerGroup.ShutdownGracefullyAsync();
+            }
         }
     }
 }

@@ -7,13 +7,15 @@ namespace Ribe.Core
     {
         public byte[] Body { get; }
 
+        public long RequestId { get; }
+
         public Dictionary<string, string> Headers { get; }
 
         public string ServicePath => Headers.GetValueOrDefault(Constants.ServicePath);
 
         public string ServiceMethodKey => Headers.GetValueOrDefault(Constants.ServiceMethodKey);
 
-        private Func<Type[], object[]> _paramterValuesProvider;
+        public Func<Type[], object[]> ParamterValuesProvider { get; }
 
         public Request(
             byte[] body,
@@ -21,14 +23,20 @@ namespace Ribe.Core
             Func<Type[], object[]> paramterValuesProvider
         )
         {
+            if (!long.TryParse(headers.GetValueOrDefault(Constants.RequestId), out var id))
+            {
+                throw new ArgumentException("RequestId Key must be numberic");
+            }
+
             Body = body;
             Headers = headers;
-            _paramterValuesProvider = paramterValuesProvider;
+            RequestId = id;
+            ParamterValuesProvider = paramterValuesProvider;
         }
 
         public object[] GetRequestParamterValues(Type[] paramterTypes)
         {
-            return _paramterValuesProvider(paramterTypes);
+            return ParamterValuesProvider(paramterTypes);
         }
     }
 }

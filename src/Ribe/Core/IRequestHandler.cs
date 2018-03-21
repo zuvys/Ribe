@@ -5,6 +5,6 @@ namespace Ribe.Core
 {
     public interface IRequestHandler
     {
-        Task HandleRequestAsync(Request request, Func<long, Response, Task> onCompleted);
+        Task HandleRequestAsync(Request request, Func<long, Response, Task> reqCallBack);
     }
 }

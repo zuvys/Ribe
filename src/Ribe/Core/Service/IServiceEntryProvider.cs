@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ribe.Core.Service
+﻿namespace Ribe.Core.Service
 {
     public interface IServiceEntryProvider
     {
-        ServiceEntry GetServiceEntry(Request context);
+        ServiceEntry GetEntry(Request context);
     }
 }

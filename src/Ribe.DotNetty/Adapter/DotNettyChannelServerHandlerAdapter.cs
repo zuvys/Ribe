@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Adapter
 {
-    public class DotNettyChannelServerHandler : ChannelHandlerAdapter
+    public class DotNettyChannelServerHandlerAdapter : ChannelHandlerAdapter
     {
         private IMessageListener _listener;
 
         private ISerializerProvider _serializerProvider;
 
-        public DotNettyChannelServerHandler(IMessageListener listener, ISerializerProvider serializerProvider)
+        public DotNettyChannelServerHandlerAdapter(IMessageListener listener, ISerializerProvider serializerProvider)
         {
             _listener = listener;
         }
@@ -21,7 +21,9 @@ namespace Ribe.DotNetty.Adapter
         public override void ChannelRead(IChannelHandlerContext context, object obj)
         {
             if (!(obj is Message message))
+            {
                 return;
+            }
 
             Task.Run(async () =>
             {

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Ribe.Rpc.Logging;
 using System;
 
 namespace Ribe.Core.Service.Internals
@@ -17,9 +17,9 @@ namespace Ribe.Core.Service.Internals
             var serviceName = serviceType.Namespace + "." + serviceType.Name;
             var servicepath = string.Format(@"/{0}/{1}/{2}/", rpc.Group, serviceName, rpc.Version);
 
-            if (_logger.IsEnabled(LogLevel.Information))
+            if (_logger.IsEnabled(LogLevel.Info))
             {
-                _logger.LogInformation($"created service path :{servicepath}");
+                _logger.Info($"created service path :{servicepath}");
             }
 
             return servicepath;

@@ -9,35 +9,34 @@ namespace Ribe.Core
 {
     public class RequestHandler : IRequestHandler
     {
-        private IServiceExecutor _serviceExecutor;
+        private IServiceExecutor _executor;
 
-        private IServiceEntryProvider _serviceEntryProvider;
+        private IServiceEntryProvider _entryProvider;
 
-        public RequestHandler(
-            IServiceExecutor serviceExecutor,
-            IServiceEntryProvider serviceEntryProvider
-        )
+        public RequestHandler(IServiceExecutor executor, IServiceEntryProvider entryProvider)
         {
-            _serviceExecutor = serviceExecutor;
-            _serviceEntryProvider = serviceEntryProvider;
+            _executor = executor;
+            _entryProvider = entryProvider;
         }
 
-        public async Task HandleRequestAsync(Request request, Func<long, Response, Task> onCompleted)
+        public async Task HandleRequestAsync(Request req, Func<long, Response, Task> reqCallBack)
         {
-            var entry = _serviceEntryProvider.GetServiceEntry(request);
+            var entry = _entryProvider.GetEntry(req);
             if (entry == null)
             {
-                throw new Exception();
+                await reqCallBack(req.RequestId, Response.Create(null, "service entry not found!", Status.EntryNotFound));
+                return;
             }
 
-            var method = entry.MethodMap.GetValueOrDefault(request.Headers[Constants.ServiceMethodKey]);
+            var method = entry.MethodMap.GetValueOrDefault(req.Headers[Constants.ServiceMethodKey]);
             if (method == null)
             {
-                throw new Exception();
+                await reqCallBack(req.RequestId, Response.Create(null, "service method not found!", Status.MethodNotFound));
+                return;
             }
 
             var paramterTypes = method.Parameters.Select(i => i.ParameterType).ToArray();
-            var parameterValues = request.GetRequestParamterValues(paramterTypes);
+            var parameterValues = req.GetRequestParamterValues(paramterTypes);
 
             var context = new ExecutionContext()
             {
@@ -46,20 +45,13 @@ namespace Ribe.Core
                 ParamterValues = parameterValues
             };
 
-            if (long.TryParse(request.Headers.GetValueOrDefault(Constants.RequestId), out long id))
+            try
             {
-                try
-                {
-                    await onCompleted(id, Response.Ok(await _serviceExecutor.ExecuteAsync(context)));
-                }
-                catch (Exception e)
-                {
-                    await onCompleted(id, Response.Failed(e.Message));
-                }
+                await reqCallBack(req.RequestId, Response.Ok(await _executor.ExecuteAsync(context)));
             }
-            else
+            catch (Exception e)
             {
-                throw new NotSupportedException($"the request not contains request id!");
+                await reqCallBack(req.RequestId, Response.Failed(e.Message));
             }
         }
     }

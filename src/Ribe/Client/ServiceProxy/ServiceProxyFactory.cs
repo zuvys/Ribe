@@ -1,4 +1,5 @@
 ﻿using Ribe.Client.Invoker;
+using Ribe.Core;
 using Ribe.Core.Service;
 using System;
 using System.Collections.Concurrent;
@@ -47,7 +48,7 @@ namespace Ribe.Client.ServiceProxy
             _serviceMethodKeyFactory = serviceMethodKeyFactory;
         }
 
-        public TService CreateProxy<TService>(Func<ServiceProxyOption> builder = null)
+        public TService CreateProxy<TService>(Func<RequestHeader> builder = null)
         {
             var type = typeof(TService);
             if (!type.IsInterface)
@@ -63,7 +64,7 @@ namespace Ribe.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(IRpcInvokerProvider), typeof(ServiceProxyOption) };
+                var ctorTypes = new[] { typeof(IRpcInvokerProvider), typeof(RequestHeader) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,
@@ -117,7 +118,7 @@ namespace Ribe.Client.ServiceProxy
                 return typeBudiler.CreateType();
             });
 
-            var options = builder != null ? builder() : new ServiceProxyOption();
+            var options = builder != null ? builder() : new RequestHeader();
 
             //TODO:ServicePath在服务端生成
             options[Constants.ServicePath] = $"/{ options[Constants.Group]}/{ type.Namespace + "." + type.Name}/{options[Constants.Version]}/";

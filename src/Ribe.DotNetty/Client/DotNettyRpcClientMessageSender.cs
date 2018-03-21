@@ -1,20 +1,20 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using DotNetty.Transport.Channels;
 
 using Ribe.Messaging;
 using Ribe.Rpc.Transport;
 
-using DotNetty.Transport.Channels;
+using System;
+using System.Threading.Tasks;
 
 namespace Ribe.DotNetty
 {
-    public class DotNettyClientMessageSender : IMessageSender, IDisposable
+    public class DotNettyRpcClientMessageSender : IMessageSender, IDisposable
     {
         private IChannel _channel;
 
         private bool _closeChannel;
 
-        public DotNettyClientMessageSender(IChannel channel, bool closeChannel = true)
+        public DotNettyRpcClientMessageSender(IChannel channel, bool closeChannel = true)
         {
             _channel = channel;
             _closeChannel = closeChannel;

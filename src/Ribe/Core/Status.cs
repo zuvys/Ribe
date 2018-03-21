@@ -4,6 +4,10 @@
     {
         Success,
 
-        Failed
+        Failed,
+
+        EntryNotFound,
+
+        MethodNotFound
     }
 }

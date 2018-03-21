@@ -1,5 +1,5 @@
 ﻿using Ribe.Client.Invoker;
-
+using Ribe.Core;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -13,7 +13,7 @@ namespace Ribe.Client.ServiceProxy
     {
         internal static MethodInfo RemoteCallMethod { get; }
 
-        protected ServiceProxyOption Options { get; }
+        protected RequestHeader Options { get; }
 
         protected IRpcInvokerProvider RequestHandlerProvider { get; }
 
@@ -22,7 +22,7 @@ namespace Ribe.Client.ServiceProxy
             RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(RemoteCall), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        public ServiceProxyBase(IRpcInvokerProvider requestHandlerProvider, ServiceProxyOption options)
+        public ServiceProxyBase(IRpcInvokerProvider requestHandlerProvider, RequestHeader options)
         {
             RequestHandlerProvider = requestHandlerProvider;
             Options = options;
@@ -34,7 +34,7 @@ namespace Ribe.Client.ServiceProxy
             var handler = RequestHandlerProvider.GetInvoker();
             if (handler == null)
             {
-                throw new RpcServerException("get RequestHandler failed!");
+                throw new RpcException("get RequestHandler failed!");
             }
 
             return handler.InvokeAsync(valueType, paramterValues, options).Result;

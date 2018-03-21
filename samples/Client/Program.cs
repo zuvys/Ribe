@@ -1,15 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
-using Ribe.Client;
-using Ribe.Client.Extensions;
 using Ribe.Client.Invoker.Internals;
 using Ribe.Client.ServiceProxy;
 using Ribe.Codecs;
+using Ribe.Core;
 using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Client;
 using Ribe.Messaging.Internal;
 using Ribe.Rpc.Json.Codecs;
 using Ribe.Rpc.Json.Messaging;
 using Ribe.Rpc.Json.Serialize;
+using Ribe.Rpc.Logging;
 using Ribe.Serialize;
 using ServiceInterfaces;
 using System;
@@ -21,6 +21,7 @@ namespace Client
         static void Main(string[] args)
         {
             var serializer = new JsonSerializer();
+          
             var clientFacotry = new DotNettyRpcClientFactory(new SerializerProvider(
                 new[] { new JsonSerializer() }
                 ),
@@ -32,9 +33,7 @@ namespace Client
                     )
                );
 
-            var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(
-                new LoggerFactory().CreateLogger("DefaultServiceMethodKeyFactory")
-            );
+            var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(new NullLogger());
 
             var serviceInvokerProvider = new RpcInvokerProvider(
                 clientFacotry,
@@ -48,7 +47,7 @@ namespace Client
             var factory = new ServiceProxyFactory(serviceInvokerProvider, serviceMethodKeyFacotry);
 
             var proxy = factory.CreateProxy<IShopService>(
-                () => new ServiceProxyOption().WithVersion("0.0.2"));
+                () => new RequestHeader());
 
             Console.WriteLine("Begin");
 

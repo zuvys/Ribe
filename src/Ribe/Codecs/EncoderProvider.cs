@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Ribe.Codecs
 {
@@ -13,15 +14,7 @@ namespace Ribe.Codecs
 
         public IEncoder GetEncoder(string encodingFormat)
         {
-            foreach (var encoder in _encoders)
-            {
-                if (encoder.CanEncode(encodingFormat))
-                {
-                    return encoder;
-                }
-            }
-
-            return null;
+            return _encoders.FirstOrDefault(i => i.CanEncode(encodingFormat));
         }
     }
 }

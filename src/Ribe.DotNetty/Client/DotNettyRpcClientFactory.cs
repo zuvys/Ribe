@@ -8,6 +8,7 @@ using Ribe.Codecs;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
 using Ribe.Messaging;
+using Ribe.Rpc.Transport;
 using Ribe.Serialize;
 using System;
 using System.Collections.Concurrent;
@@ -31,7 +32,7 @@ namespace Ribe.DotNetty.Client
             ISerializerProvider serializerProvider,
             IEncoderProvider encoderProvider,
             IDecoderProvider decoderProvider
-            )
+         )
         {
             _serializerProvider = serializerProvider;
 
@@ -43,53 +44,44 @@ namespace Ribe.DotNetty.Client
                 .Option(ChannelOption.TcpNodelay, true)
                 .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
-                    var pip = channel.Pipeline;
-                    pip.AddLast(new LoggingHandler());
-                    pip.AddLast(new LengthFieldPrepender(4));
-                    pip.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                    pip.AddLast(new DotNettyChannelDecoderHandler(decoderProvider));
-                    pip.AddLast(new DotNettyChannelEncoderHandler(encoderProvider));
-                    pip.AddLast(new DotNettyChannelClientHandler((message) =>
+                    channel.Pipeline.AddLast(new LoggingHandler());
+                    channel.Pipeline.AddLast(new LengthFieldPrepender(4));
+                    channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
+                    channel.Pipeline.AddLast(new DotNettyChannelDecoderHandlerAdapter(decoderProvider));
+                    channel.Pipeline.AddLast(new DotNettyChannelEncoderHandlerAdapter(encoderProvider));
+                    channel.Pipeline.AddLast(new DotNettyChannelClientHandlerAdapter((message) =>
                     {
-                        if (message == null)
-                        {
-                            throw new Exception("message is null!");
-                        }
-
-                        if (message.Headers == null)
-                        {
-                            throw new NullReferenceException("message headers is null!");
-                        }
-
                         var requestId = message.Headers.GetValueOrDefault(Constants.RequestId);
                         if (requestId == null)
                         {
-                            throw new Exception($"Result Headers not constains {Constants.RequestId} key");
+                            throw new Exception($"Response Headers not constains {Constants.RequestId} key");
                         }
 
-                        if (long.TryParse(requestId, out long id))
+                        if (long.TryParse(requestId, out var id))
                         {
                             if (_map.TryRemove(id, out var tcs))
                             {
                                 tcs.SetResult(message);
                                 return;
                             }
-
-                            throw new Exception($"the request with id {id} was not found!");
                         }
-
-                        throw new NotSupportedException("request id must type with long");
                     }));
                 }));
         }
 
-        public IRpcClient CreateClient(ServiceAddress address)
+        public RpcClient Create(ServiceAddress address)
         {
-            var endPoint = new IPEndPoint(IPAddress.Parse(address.Ip), address.Port);
-            var channel = _bootstrap.ConnectAsync(endPoint).Result;
-            var sender = new DotNettyClientMessageSender(channel);
-
-            return new RpcClient(sender, _serializerProvider, _map);
+            try
+            {
+                return new RpcClient(
+                    new DotNettyRpcClientMessageSender(_bootstrap.ConnectAsync(address.ToEndPoint()).Result),
+                    _serializerProvider,
+                    _map);
+            }
+            catch (Exception e)
+            {
+                throw new ConnectException($"connect to server faield!ip:{address.Ip},port:{address.Port}", e);
+            }
         }
 
         public void Dispose()

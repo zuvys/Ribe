@@ -4,20 +4,20 @@ using Ribe.Rpc.Transport;
 using System;
 using System.Threading.Tasks;
 
-namespace Ribe.Rpc.Client
+namespace Ribe.Rpc.Server
 {
-    public class RpcClientMessageListener : IMessageListener
+    public class MessageListener : IMessageListener
     {
-        private Type _responseValueType;
+        private IRequestHandler _handler;
 
         private IMessageConvertorProvider _messageConvertorProvider;
 
-        public RpcClientMessageListener(
-            Type responseValueType,
+        public MessageListener(
+            IRequestHandler handler,
             IMessageConvertorProvider messageConvertorProvider
         )
         {
-            _responseValueType = responseValueType;
+            _handler = handler;
             _messageConvertorProvider = messageConvertorProvider;
         }
 
@@ -29,12 +29,7 @@ namespace Ribe.Rpc.Client
                 throw new NotSupportedException("not supported!");
             }
 
-            if (long.TryParse(message.Headers[Constants.RequestId], out var id))
-            {
-                return onCompleted(id, convertor.ConvertToResponse(message, _responseValueType));
-            }
-
-            throw new Exception("parse the request id error!");
+            return _handler.HandleRequestAsync(convertor.ConvertToRequest(message), onCompleted);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Ribe.Rpc.Logging;
 using System.Reflection;
 using System.Text;
 
@@ -27,9 +27,9 @@ namespace Ribe.Core.Service.Internals
 
             var serviceMethodId = sb.ToString();
 
-            if (_logger.IsEnabled(LogLevel.Information))
+            if (_logger.IsEnabled(LogLevel.Info))
             {
-                _logger.LogInformation($"created service method id {serviceMethodId}");
+                _logger.Info($"created service method id {serviceMethodId}");
             }
 
             return serviceMethodId;

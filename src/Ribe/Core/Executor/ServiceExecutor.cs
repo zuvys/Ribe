@@ -1,33 +1,40 @@
-﻿using Microsoft.Extensions.Logging;
-using Ribe.Core.Service;
+﻿using Ribe.Core.Service;
+using Ribe.Rpc.Logging;
 using System.Threading.Tasks;
 
 namespace Ribe.Core.Executor
 {
     public class ServiceExecutor : IServiceExecutor
     {
-        private ILogger<ServiceExecutor> _logger;
+        private ILogger _logger;
 
-        private IObjectMethodExecutorProvider _objectMethodExecutorProvider;
+        private IObjectMethodExecutorProvider _methodExecutorProvider;
 
         private IServiceActivator _serviceActivator;
 
         public ServiceExecutor(
             IServiceActivator serviceActivator,
-            IObjectMethodExecutorProvider objectMethodExecutorProvider,
-            ILogger<ServiceExecutor> logger)
+            IObjectMethodExecutorProvider methodExecutorProvider,
+            ILogger logger)
         {
             _serviceActivator = serviceActivator;
-            _objectMethodExecutorProvider = objectMethodExecutorProvider;
+            _methodExecutorProvider = methodExecutorProvider;
             _logger = logger;
         }
 
-        public Task<object> ExecuteAsync(ExecutionContext context)
+        public async Task<object> ExecuteAsync(ExecutionContext context)
         {
-            var methodExecutor = _objectMethodExecutorProvider.GetExecutor(context);
             var service = _serviceActivator.Create(context.ServiceType);
+            var methodExecutor = _methodExecutorProvider.GetExecutor(context);
 
-            return methodExecutor.ExecuteAsync(service, context.ParamterValues);
+            try
+            {
+                return await methodExecutor.ExecuteAsync(service, context.ParamterValues);
+            }
+            finally
+            {
+                _serviceActivator.Release(service);
+            }
         }
     }
 }

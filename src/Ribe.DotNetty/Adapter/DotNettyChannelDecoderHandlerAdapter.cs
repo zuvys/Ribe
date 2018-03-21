@@ -9,11 +9,11 @@ using System.Text;
 
 namespace Ribe.DotNetty.Adapter
 {
-    public class DotNettyChannelDecoderHandler : ByteToMessageDecoder
+    public class DotNettyChannelDecoderHandlerAdapter : ByteToMessageDecoder
     {
         private IDecoderProvider _decoderProvider;
 
-        public DotNettyChannelDecoderHandler(IDecoderProvider decoderProvider)
+        public DotNettyChannelDecoderHandlerAdapter(IDecoderProvider decoderProvider)
         {
             _decoderProvider = decoderProvider;
         }
@@ -36,7 +36,7 @@ namespace Ribe.DotNetty.Adapter
             var decoder = _decoderProvider.GetDecoder(contentType);
             if (decoder == null)
             {
-                throw new Exception();
+                throw new NullReferenceException(nameof(decoder));
             }
 
             context.FireChannelRead(decoder.Decode(content));

@@ -4,19 +4,18 @@ using System;
 
 namespace Ribe.DotNetty.Adapter
 {
-    public class DotNettyChannelClientHandler : ChannelHandlerAdapter
+    public class DotNettyChannelClientHandlerAdapter : ChannelHandlerAdapter
     {
         private Action<Message> _handler;
 
-        public DotNettyChannelClientHandler(Action<Message> handler)
+        public DotNettyChannelClientHandlerAdapter(Action<Message> handler)
         {
             _handler = handler;
         }
 
-        public override void ChannelRead(IChannelHandlerContext context, object msg)
+        public override void ChannelRead(IChannelHandlerContext context, object obj)
         {
-            var message = (Message)msg;
-            if (message != null)
+            if (obj is Message message)
             {
                 _handler(message);
             }

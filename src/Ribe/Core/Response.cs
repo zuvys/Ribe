@@ -13,21 +13,21 @@
 
         public static Response Ok(object data)
         {
-            return new Response()
-            {
-                Error = string.Empty,
-                Data = data,
-                Status = Status.Success
-            };
+            return Create(data, string.Empty, Status.Success);
         }
 
         public static Response Failed(string error)
         {
+            return Create(null, error, Status.Failed);
+        }
+
+        public static Response Create(object data, string error, Status status)
+        {
             return new Response()
             {
-                Data = null,
+                Data = data,
                 Error = error,
-                Status = Status.Success
+                Status = status
             };
         }
     }

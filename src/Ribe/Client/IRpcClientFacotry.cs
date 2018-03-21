@@ -4,6 +4,6 @@ namespace Ribe.Client
 {
     public interface IRpcClientFacotry
     {
-        IRpcClient CreateClient(ServiceAddress address);
+        RpcClient Create(ServiceAddress address);
     }
 }
