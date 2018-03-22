@@ -8,6 +8,7 @@ using Ribe.Codecs;
 using Ribe.Core.Service.Address;
 using Ribe.DotNetty.Adapter;
 using Ribe.Messaging;
+using Ribe.Rpc.Core.Runtime.Client;
 using Ribe.Rpc.Transport;
 using Ribe.Serialize;
 using System;
@@ -18,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Ribe.DotNetty.Client
 {
-    public class DotNettyRpcClientFactory : IRpcClientFacotry, IDisposable
+    public class DotNettyServiceClientFactory : IServiceClientFacotry, IDisposable
     {
         private Bootstrap _bootstrap;
 
@@ -28,7 +29,7 @@ namespace Ribe.DotNetty.Client
 
         private ISerializerProvider _serializerProvider;
 
-        public DotNettyRpcClientFactory(
+        public DotNettyServiceClientFactory(
             ISerializerProvider serializerProvider,
             IEncoderProvider encoderProvider,
             IDecoderProvider decoderProvider
@@ -69,11 +70,11 @@ namespace Ribe.DotNetty.Client
                 }));
         }
 
-        public RpcClient Create(ServiceAddress address)
+        public IServiceClient Create(ServiceAddress address)
         {
             try
             {
-                return new RpcClient(
+                return new ServiceClient(
                     new DotNettyRpcClientMessageSender(_bootstrap.ConnectAsync(address.ToEndPoint()).Result),
                     _serializerProvider,
                     _map);

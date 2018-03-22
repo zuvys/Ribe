@@ -5,7 +5,7 @@ using Ribe.Rpc.Transport;
 
 using DotNetty.Transport.Channels;
 
-namespace Ribe.Rpc.DotNetty
+namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
 {
     public class DotNettyServerMessageSender : IMessageSender
     {

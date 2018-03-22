@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class DefaultServiceMethodMapFacotry : IServiceMethodMapFacotry
+    public class ServiceMethodMapFacotry : IServiceMethodMapFacotry
     {
         private IServiceMethodKeyFactory _serviceMthodKeyFactory;
 
         private ILogger _logger;
 
-        public DefaultServiceMethodMapFacotry(IServiceMethodKeyFactory serviceMthodKeyFactory, ILogger logger)
+        public ServiceMethodMapFacotry(IServiceMethodKeyFactory serviceMthodKeyFactory, ILogger logger)
         {
             _serviceMthodKeyFactory = serviceMthodKeyFactory;
             _logger = logger;

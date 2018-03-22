@@ -1,10 +1,10 @@
 ﻿namespace Ribe.Core.Service.Internals
 {
-    public class DefaultServiceEntryProvider : IServiceEntryProvider
+    public class ServiceEntryProvider : IServiceEntryProvider
     {
         private ServiceEntryCache _cache;
 
-        public DefaultServiceEntryProvider(ServiceEntryCache cache)
+        public ServiceEntryProvider(ServiceEntryCache cache)
         {
             _cache = cache;
         }

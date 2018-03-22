@@ -15,14 +15,14 @@ namespace Ribe.Client.ServiceProxy
 
         protected RequestHeader Options { get; }
 
-        protected IRpcInvokerProvider RequestHandlerProvider { get; }
+        protected IServiceProvider RequestHandlerProvider { get; }
 
         static ServiceProxyBase()
         {
             RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(RemoteCall), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        public ServiceProxyBase(IRpcInvokerProvider requestHandlerProvider, RequestHeader options)
+        public ServiceProxyBase(Invoker.IServiceInvokerProvider requestHandlerProvider, RequestHeader options)
         {
             RequestHandlerProvider = requestHandlerProvider;
             Options = options;

@@ -3,11 +3,11 @@ using System;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class DefaultServiceEntryPathFactory : IServiceEntryPathFacotry
+    public class ServiceEntryPathFactory : IServiceEntryPathFacotry
     {
         private ILogger _logger;
 
-        public DefaultServiceEntryPathFactory(ILogger logger)
+        public ServiceEntryPathFactory(ILogger logger)
         {
             _logger = logger;
         }

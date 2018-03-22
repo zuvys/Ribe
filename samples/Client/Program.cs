@@ -22,7 +22,7 @@ namespace Client
         {
             var serializer = new JsonSerializer();
           
-            var clientFacotry = new DotNettyRpcClientFactory(new SerializerProvider(
+            var clientFacotry = new DotNettyServiceClientFactory(new SerializerProvider(
                 new[] { new JsonSerializer() }
                 ),
                 new EncoderProvider(new[] {
@@ -33,9 +33,9 @@ namespace Client
                     )
                );
 
-            var serviceMethodKeyFacotry = new DefaultServiceMethodKeyFactory(new NullLogger());
+            var serviceMethodKeyFacotry = new ServiceMethodKeyFactory(new NullLogger());
 
-            var serviceInvokerProvider = new RpcInvokerProvider(
+            var serviceInvokerProvider = new ServiceInvokderProvider(
                 clientFacotry,
                 new DefaultMessageConvertorProvider(
                     new[] {

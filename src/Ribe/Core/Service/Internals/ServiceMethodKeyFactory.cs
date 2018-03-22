@@ -4,11 +4,11 @@ using System.Text;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class DefaultServiceMethodKeyFactory : IServiceMethodKeyFactory
+    public class ServiceMethodKeyFactory : IServiceMethodKeyFactory
     {
         private ILogger _logger;
 
-        public DefaultServiceMethodKeyFactory(ILogger logger)
+        public ServiceMethodKeyFactory(ILogger logger)
         {
             _logger = logger;
         }

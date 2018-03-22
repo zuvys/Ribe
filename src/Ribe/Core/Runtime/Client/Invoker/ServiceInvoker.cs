@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 namespace Ribe.Client.Invoker.Internals
 {
     /// <summary>
-    /// default <see cref="IRpcInvoker"/> 
+    /// default <see cref="IServiceInvoker"/> 
     /// </summary>
-    public class RpcInvoker : IRpcInvoker
+    public class ServiceInvoker : IServiceInvoker
     {
-        private IRpcClientFacotry _clientFactory;
+        private IServiceClientFacotry _clientFactory;
 
         private IMessageConvertorProvider _convertorProvider;
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        public RpcInvoker(IRpcClientFacotry clientFactory, IMessageConvertorProvider convetorProvider)
+        public ServiceInvoker(IServiceClientFacotry clientFactory, IMessageConvertorProvider convetorProvider)
         {
             _clientFactory = clientFactory;
             _convertorProvider = convetorProvider;

@@ -3,22 +3,22 @@ using Ribe.Messaging;
 
 namespace Ribe.Client.Invoker.Internals
 {
-    public class RpcInvokerProvider : IRpcInvokerProvider
+    public class ServiceInvokderProvider : IServiceInvokerProvider
     {
-        private IRpcClientFacotry _clientFacotry;
+        private IServiceClientFacotry _clientFacotry;
 
         private IMessageConvertorProvider _messageConvetorProvider;
 
-        public RpcInvokerProvider(IRpcClientFacotry clientFacotry, IMessageConvertorProvider messageConvetorProvider)
+        public ServiceInvokderProvider(IServiceClientFacotry clientFacotry, IMessageConvertorProvider messageConvetorProvider)
         {
             _clientFacotry = clientFacotry;
             _messageConvetorProvider = messageConvetorProvider;
         }
 
-        public IRpcInvoker GetInvoker()
+        public IServiceInvoker GetInvoker()
         {
             //Select one ServiceAddress
-            return new RpcInvoker(_clientFacotry, _messageConvetorProvider)
+            return new ServiceInvoker(_clientFacotry, _messageConvetorProvider)
             {
                 ServiceAddress = new ServiceAddress()
                 {

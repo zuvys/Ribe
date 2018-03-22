@@ -25,7 +25,7 @@ namespace Ribe.Client.ServiceProxy
 
         private IServiceMethodKeyFactory _serviceMethodKeyFactory;
 
-        private IRpcInvokerProvider _requestHandlerProvider;
+        private Invoker.IServiceInvokerProvider _requestHandlerProvider;
 
         static ServiceProxyFactory()
         {
@@ -40,7 +40,7 @@ namespace Ribe.Client.ServiceProxy
         /// <param name="serviceInvokerProvider"></param>
         /// <param name="serviceMethodKeyFactory"></param>
         public ServiceProxyFactory(
-            IRpcInvokerProvider requestHandlerProvider,
+            Invoker.IServiceInvokerProvider requestHandlerProvider,
             IServiceMethodKeyFactory serviceMethodKeyFactory
         )
         {
@@ -64,7 +64,7 @@ namespace Ribe.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(IRpcInvokerProvider), typeof(RequestHeader) };
+                var ctorTypes = new[] { typeof(Invoker.IServiceInvokerProvider), typeof(RequestHeader) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,

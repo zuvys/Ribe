@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class DefaultServiceEntryFactory : IServiceEntryFactory
+    public class ServiceEntryFactory : IServiceEntryFactory
     {
         private IServiceMethodMapFacotry _serviceMethodMapFactory;
 
@@ -13,7 +13,7 @@ namespace Ribe.Core.Service.Internals
 
         private ILogger _logger;
 
-        public DefaultServiceEntryFactory(
+        public ServiceEntryFactory(
             IServiceEntryPathFacotry servicePathFacotry,
             IServiceMethodMapFacotry serviceMethodMapFactory,
             ILogger logger)

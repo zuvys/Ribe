@@ -2,7 +2,7 @@
 
 namespace Ribe.Core.Service.Internals
 {
-    public class DefaultServiceActivator : IServiceActivator
+    public class ServiceActivator : IServiceActivator
     {
         public object Create(Type serviceType)
         {

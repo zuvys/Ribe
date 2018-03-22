@@ -1,5 +1,6 @@
 ﻿using Ribe.Core;
 using Ribe.Messaging;
+using Ribe.Rpc.Core.Runtime.Client;
 using Ribe.Rpc.Transport;
 using Ribe.Serialize;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ribe.Client
 {
-    public class RpcClient : IDisposable
+    public class ServiceClient :IServiceClient, IDisposable
     {
         protected static long Seed;
 
@@ -19,12 +20,12 @@ namespace Ribe.Client
 
         protected ConcurrentDictionary<long, TaskCompletionSource<Message>> Map { get; }
 
-        static RpcClient()
+        static ServiceClient()
         {
             Seed = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
-        public RpcClient(
+        public ServiceClient(
             IMessageSender sender,
             ISerializerProvider serializerProvider,
             ConcurrentDictionary<long, TaskCompletionSource<Message>> map)
@@ -48,10 +49,9 @@ namespace Ribe.Client
                 context.RequestHeaders[Constants.RequestId] = id.ToString();
             }
 
-            SendMessage(new Message(
-                context.RequestHeaders,
-                serializer.SerializeObject(context.RequestParamterValues)
-            ));
+            await Sender.SendAsync(new Message(
+                  context.RequestHeaders,
+                  serializer.SerializeObject(context.RequestParamterValues)));
 
             if (context.IsVoidRequest)
             {
@@ -59,11 +59,6 @@ namespace Ribe.Client
             }
 
             return await Map.GetOrAdd(id, (k) => new TaskCompletionSource<Message>()).Task;
-        }
-
-        private async void SendMessage(Message message)
-        {
-            await Sender.SendAsync(message);
         }
 
         public virtual void Dispose()
