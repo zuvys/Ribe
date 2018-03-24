@@ -1,10 +1,10 @@
-﻿using Ribe.Client.Invoker;
-using Ribe.Core;
+﻿using Ribe.Core;
+using Ribe.Rpc.Core.Runtime.Client.Invoker;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Ribe.Client.ServiceProxy
+namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 {
     /// <summary>
     /// the abstract class of service proxy 
@@ -15,23 +15,23 @@ namespace Ribe.Client.ServiceProxy
 
         protected RequestHeader Options { get; }
 
-        protected IServiceProvider RequestHandlerProvider { get; }
+        protected IServiceInvokerProvider InvokderProvider { get; }
 
         static ServiceProxyBase()
         {
-            RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(RemoteCall), BindingFlags.Instance | BindingFlags.NonPublic);
+            RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(InvokeService), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        public ServiceProxyBase(Invoker.IServiceInvokerProvider requestHandlerProvider, RequestHeader options)
+        public ServiceProxyBase(IServiceInvokerProvider invokderProvider, RequestHeader options)
         {
-            RequestHandlerProvider = requestHandlerProvider;
+            InvokderProvider = invokderProvider;
             Options = options;
         }
 
-        protected object RemoteCall(string methodKey, Type valueType, object[] paramterValues)
+        protected object InvokeService(string methodKey, Type valueType, object[] paramterValues)
         {
-            var options = Options.Clone(new[] { new KeyValuePair<string, string>(Constants.ServiceMethodKey, methodKey) });
-            var handler = RequestHandlerProvider.GetInvoker();
+            var options = Options.Clone(new[] { new KeyValuePair<string, string>(Constants.ServiceMethodName, methodKey) });
+            var handler = InvokderProvider.GetInvoker();
             if (handler == null)
             {
                 throw new RpcException("get RequestHandler failed!");

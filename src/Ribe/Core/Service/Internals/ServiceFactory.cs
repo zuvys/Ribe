@@ -5,17 +5,17 @@ using System.Reflection;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class ServiceEntryFactory : IServiceEntryFactory
+    public class ServiceFactory : IServiceFactory
     {
-        private IServiceMethodMapFacotry _serviceMethodMapFactory;
+        private IServiceMethodNameMapFactory _serviceMethodMapFactory;
 
-        private IServiceEntryPathFacotry _servicePathFacotry;
+        private IServicePathFacotry _servicePathFacotry;
 
         private ILogger _logger;
 
-        public ServiceEntryFactory(
-            IServiceEntryPathFacotry servicePathFacotry,
-            IServiceMethodMapFacotry serviceMethodMapFactory,
+        public ServiceFactory(
+            IServicePathFacotry servicePathFacotry,
+            IServiceMethodNameMapFactory serviceMethodMapFactory,
             ILogger logger)
         {
             _servicePathFacotry = servicePathFacotry;

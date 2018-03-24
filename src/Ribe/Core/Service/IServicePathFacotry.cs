@@ -2,7 +2,7 @@
 
 namespace Ribe.Core.Service
 {
-    public interface IServiceEntryPathFacotry
+    public interface IServicePathFacotry
     {
         string CreatePath(Type serviceType, ServiceAttribute rpc);
     }

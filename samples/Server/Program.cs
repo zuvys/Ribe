@@ -1,11 +1,16 @@
 ﻿using Ribe.Codecs;
+using Ribe.Core;
+using Ribe.Core.Executor;
+using Ribe.Core.Executor.Internals;
 using Ribe.Core.Service;
 using Ribe.Core.Service.Internals;
-using Ribe.Messaging.Internal;
+using Ribe.Messaging;
+using Ribe.Rpc.DotNetty.Core.Runtime.Server;
 using Ribe.Rpc.Json.Codecs;
 using Ribe.Rpc.Json.Messaging;
 using Ribe.Rpc.Json.Serialize;
 using Ribe.Rpc.Logging;
+using Ribe.Rpc.Server;
 using Ribe.Serialize;
 using ServiceInterface;
 using System;
@@ -18,34 +23,27 @@ namespace Client
         {
             //scan
             var logger = new NullLogger();
-            var facotry = new ServiceEntryFactory(
-                new ServiceEntryPathFactory(logger),
-                new ServiceMethodMapFacotry(new ServiceMethodKeyFactory(logger), logger),
+            var facotry = new ServiceFactory(
+                new ServicePathFactory(logger),
+                new ServiceMethodNameMapFacotry(new ServiceMethodNameFactory(logger), logger),
                 logger);
 
-            var cache = new ServiceEntryCache();
+            var activator = new ServiceActivator();
+            var methodExecutor = new ObjectMethodExecutorProvider();
+            var executor = new ServiceExecutor(activator, methodExecutor, NullLogger.Instance);
+            var entryProvider = new ServiceProvider(facotry);
 
-            foreach (var item in facotry.CreateServices(typeof(ShopServiceImpl)))
-            {
-                cache.AddOrUpdate(item);
-            }
+            var requestHandler = new RequestHandler(executor, entryProvider);
+            var messageListener = new MessageListener(requestHandler, new MessageFormatterProvider(new[] { new JsonMessageFormatter() }));
 
-            foreach (var item in facotry.CreateServices(typeof(ShopServiceImpl2)))
-            {
-                cache.AddOrUpdate(item);
-            }
+            var factory = new DotNettyServiceHostFactory(
+                messageListener,
+                  new EncoderProvider(new[] { new JsonEncoder() }),
+                  new DecoderProvider(new[] { new JsonDecoder() }),
+                  new SerializerProvider(new[] { JsonSerializer.Default })
+                );
 
-            //new DotNettyServer(cache,
-            //    new EncoderProvider(new[] { new JsonEncoder() }),
-            //    new DecoderProvider(new[] { new JsonDecoder() }),
-            //    new DefaultMessageConvertorProvider(new[] { new JsonMessageConvertor() }),
-            //    new SerializerProvider(new[] { JsonSerializer.Default }),
-            //    new Ribe.Core.Service.Address.ServiceAddress()
-            //    {
-            //        Ip = "127.0.0.1",
-            //        Port = 8080
-            //    }
-            //    ).StartAsync().Wait();
+            factory.Create(8080).StartAsync().Wait();
             Console.ReadLine();
         }
     }

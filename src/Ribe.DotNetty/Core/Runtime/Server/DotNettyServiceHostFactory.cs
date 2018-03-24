@@ -4,6 +4,7 @@ using DotNetty.Transport.Channels.Sockets;
 using Ribe.Codecs;
 using Ribe.DotNetty.Adapter;
 using Ribe.Rpc.Core.Runtime.Server;
+using Ribe.Rpc.Transport;
 using Ribe.Serialize;
 
 namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
@@ -16,12 +17,16 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
 
         private ISerializerProvider _serializerProvider;
 
+        private IMessageListener _listener;
+
         public DotNettyServiceHostFactory(
+            IMessageListener listener,
             IEncoderProvider encoderProvider,
             IDecoderProvider decoderProvider,
             ISerializerProvider serializerProvider
         )
         {
+            _listener = listener;
             _encoderProvider = encoderProvider;
             _decoderProvider = decoderProvider;
             _serializerProvider = serializerProvider;
@@ -35,7 +40,7 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
                 channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
                 channel.Pipeline.AddLast(new DotNettyChannelDecoderHandlerAdapter(_decoderProvider));
                 channel.Pipeline.AddLast(new DotNettyChannelEncoderHandlerAdapter(_encoderProvider));
-                channel.Pipeline.AddLast(new DotNettyChannelServerHandlerAdapter(null, _serializerProvider));
+                channel.Pipeline.AddLast(new DotNettyChannelServerHandlerAdapter(_listener, _serializerProvider));
             }));
         }
     }

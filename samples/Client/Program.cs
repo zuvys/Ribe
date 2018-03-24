@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using Ribe.Client.Invoker.Internals;
-using Ribe.Client.ServiceProxy;
-using Ribe.Codecs;
+﻿using Ribe.Codecs;
 using Ribe.Core;
 using Ribe.Core.Service.Internals;
 using Ribe.DotNetty.Client;
-using Ribe.Messaging.Internal;
+using Ribe.Messaging;
+using Ribe.Rpc.Core.Runtime.Client.Invoker;
+using Ribe.Rpc.Core.Runtime.Client.ServiceProxy;
 using Ribe.Rpc.Json.Codecs;
 using Ribe.Rpc.Json.Messaging;
 using Ribe.Rpc.Json.Serialize;
@@ -33,13 +32,13 @@ namespace Client
                     )
                );
 
-            var serviceMethodKeyFacotry = new ServiceMethodKeyFactory(new NullLogger());
+            var serviceMethodKeyFacotry = new ServiceMethodNameFactory(new NullLogger());
 
             var serviceInvokerProvider = new ServiceInvokderProvider(
                 clientFacotry,
-                new DefaultMessageConvertorProvider(
+                new MessageFormatterProvider(
                     new[] {
-                        new JsonMessageConvertor()
+                        new JsonMessageFormatter()
                     }
                     )
             );

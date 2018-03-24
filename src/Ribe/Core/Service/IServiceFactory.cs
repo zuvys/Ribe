@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Ribe.Core.Service
 {
-    public interface IServiceEntryFactory
+    public interface IServiceFactory
     {
         List<ServiceEntry> CreateServices(Type serviceType);
     }

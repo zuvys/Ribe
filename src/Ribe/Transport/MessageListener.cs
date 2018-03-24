@@ -10,11 +10,11 @@ namespace Ribe.Rpc.Server
     {
         private IRequestHandler _handler;
 
-        private IMessageConvertorProvider _messageConvertorProvider;
+        private IMessageFormatterProvider _messageConvertorProvider;
 
         public MessageListener(
             IRequestHandler handler,
-            IMessageConvertorProvider messageConvertorProvider
+            IMessageFormatterProvider messageConvertorProvider
         )
         {
             _handler = handler;
@@ -23,13 +23,13 @@ namespace Ribe.Rpc.Server
 
         public Task ReceiveAsync(Message message, Func<long, Response, Task> onCompleted)
         {
-            var convertor = _messageConvertorProvider.GetConvertor(message);
+            var convertor = _messageConvertorProvider.GetFormatter(message);
             if (convertor == null)
             {
                 throw new NotSupportedException("not supported!");
             }
 
-            return _handler.HandleRequestAsync(convertor.ConvertToRequest(message), onCompleted);
+            return _handler.HandleRequestAsync(convertor.FormatRequest(message), onCompleted);
         }
     }
 }

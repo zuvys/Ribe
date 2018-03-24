@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Ribe.Core
+namespace Ribe.Rpc.Core
 {
     public class RequestContext
     {

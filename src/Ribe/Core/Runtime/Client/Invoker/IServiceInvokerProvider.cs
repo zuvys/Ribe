@@ -1,4 +1,4 @@
-﻿namespace Ribe.Client.Invoker
+﻿namespace Ribe.Rpc.Core.Runtime.Client.Invoker
 {
     public interface IServiceInvokerProvider
     {

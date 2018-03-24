@@ -1,15 +1,15 @@
 ﻿using Ribe.Core.Service.Address;
 using Ribe.Messaging;
 
-namespace Ribe.Client.Invoker.Internals
+namespace Ribe.Rpc.Core.Runtime.Client.Invoker
 {
     public class ServiceInvokderProvider : IServiceInvokerProvider
     {
         private IServiceClientFacotry _clientFacotry;
 
-        private IMessageConvertorProvider _messageConvetorProvider;
+        private IMessageFormatterProvider _messageConvetorProvider;
 
-        public ServiceInvokderProvider(IServiceClientFacotry clientFacotry, IMessageConvertorProvider messageConvetorProvider)
+        public ServiceInvokderProvider(IServiceClientFacotry clientFacotry, IMessageFormatterProvider messageConvetorProvider)
         {
             _clientFacotry = clientFacotry;
             _messageConvetorProvider = messageConvetorProvider;

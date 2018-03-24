@@ -17,7 +17,7 @@
 
         public const string ServicePath = "Service_Path";
 
-        public const string ServiceMethodKey = "Service_Method_Key";
+        public const string ServiceMethodName = "Service_Method_Name";
 
         public const string RequestKey = "Service_Request";
 

@@ -1,7 +1,7 @@
 ﻿using Ribe.Core;
 using System;
 
-namespace Ribe.Client.ServiceProxy
+namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 {
     public interface IServiceProxyFactory
     {

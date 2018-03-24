@@ -4,7 +4,7 @@ using Ribe.Messaging;
 using System;
 using System.Threading.Tasks;
 
-namespace Ribe.Client.Invoker.Internals
+namespace Ribe.Rpc.Core.Runtime.Client.Invoker
 {
     /// <summary>
     /// default <see cref="IServiceInvoker"/> 
@@ -13,11 +13,11 @@ namespace Ribe.Client.Invoker.Internals
     {
         private IServiceClientFacotry _clientFactory;
 
-        private IMessageConvertorProvider _convertorProvider;
+        private IMessageFormatterProvider _convertorProvider;
 
         public ServiceAddress ServiceAddress { get; internal set; }
 
-        public ServiceInvoker(IServiceClientFacotry clientFactory, IMessageConvertorProvider convetorProvider)
+        public ServiceInvoker(IServiceClientFacotry clientFactory, IMessageFormatterProvider convetorProvider)
         {
             _clientFactory = clientFactory;
             _convertorProvider = convetorProvider;
@@ -40,13 +40,13 @@ namespace Ribe.Client.Invoker.Internals
                 throw new NullReferenceException(nameof(message));
             }
 
-            var convertor = _convertorProvider.GetConvertor(message);
+            var convertor = _convertorProvider.GetFormatter(message);
             if (convertor == null)
             {
                 throw new NotSupportedException("not supported!");
             }
 
-            var data = convertor.ConvertToResponse(message, context.ResponseValueType);
+            var data = convertor.FormatResponse(message, context.ResponseValueType);
             if (data == null)
             {
                 throw new RpcException("return value is null");

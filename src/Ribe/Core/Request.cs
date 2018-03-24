@@ -13,7 +13,7 @@ namespace Ribe.Core
 
         public string ServicePath => Headers.GetValueOrDefault(Constants.ServicePath);
 
-        public string ServiceMethodKey => Headers.GetValueOrDefault(Constants.ServiceMethodKey);
+        public string ServiceMethodKey => Headers.GetValueOrDefault(Constants.ServiceMethodName);
 
         public Func<Type[], object[]> ParamterValuesProvider { get; }
 

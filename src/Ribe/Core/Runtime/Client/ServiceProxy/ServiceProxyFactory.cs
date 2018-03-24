@@ -1,5 +1,4 @@
-﻿using Ribe.Client.Invoker;
-using Ribe.Core;
+﻿using Ribe.Core;
 using Ribe.Core.Service;
 using System;
 using System.Collections.Concurrent;
@@ -7,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Ribe.Client.ServiceProxy
+namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 {
     public class ServiceProxyFactory : IServiceProxyFactory
     {
@@ -23,7 +22,7 @@ namespace Ribe.Client.ServiceProxy
 
         private static ConcurrentDictionary<Type, Type> ServiceProxies { get; }
 
-        private IServiceMethodKeyFactory _serviceMethodKeyFactory;
+        private IServiceMethodNameFactory _serviceMethodKeyFactory;
 
         private Invoker.IServiceInvokerProvider _requestHandlerProvider;
 
@@ -41,7 +40,7 @@ namespace Ribe.Client.ServiceProxy
         /// <param name="serviceMethodKeyFactory"></param>
         public ServiceProxyFactory(
             Invoker.IServiceInvokerProvider requestHandlerProvider,
-            IServiceMethodKeyFactory serviceMethodKeyFactory
+            IServiceMethodNameFactory serviceMethodKeyFactory
         )
         {
             _requestHandlerProvider = requestHandlerProvider;
@@ -80,7 +79,7 @@ namespace Ribe.Client.ServiceProxy
 
                 foreach (var item in serviceType.GetMethods())
                 {
-                    var serviceMethodKey = _serviceMethodKeyFactory.CreateMethodKey(item);
+                    var serviceMethodKey = _serviceMethodKeyFactory.CreateName(item);
                     var paramterInfos = item.GetParameters();
                     var paramterTypes = paramterInfos.Select(i => i.ParameterType).ToArray();
                     var methodBudiler = typeBudiler.DefineMethod(

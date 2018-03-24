@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace Ribe.Rpc.Json.Messaging
 {
-    public class JsonMessageConvertor : IMessageConvertor
+    public class JsonMessageFormatter : IMessageFormatter
     {
-        public bool CanConvert(Message message)
+        public bool IsFormatSupported(Message message)
         {
             if (message == null || message.Headers == null)
             {
@@ -18,7 +18,7 @@ namespace Ribe.Rpc.Json.Messaging
             return message.Headers.GetValueOrDefault(Constants.ContentType).ToLower() == "json";
         }
 
-        public Response ConvertToResponse(Message message, Type valueType)
+        public Response FormatResponse(Message message, Type valueType)
         {
             if (message == null)
             {
@@ -34,7 +34,7 @@ namespace Ribe.Rpc.Json.Messaging
             return entry;
         }
 
-        public Request ConvertToRequest(Message message)
+        public Request FormatRequest(Message message)
         {
             return new Request(message.Content, message.Headers, (parameterTypes) =>
             {

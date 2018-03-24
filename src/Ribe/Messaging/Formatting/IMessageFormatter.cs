@@ -6,12 +6,12 @@ namespace Ribe.Messaging
     /// <summary>
     /// an interface can convert <see cref="Message"/> to<see cref="Response"/> and <see cref="Request"/>
     /// </summary>
-    public interface IMessageConvertor
+    public interface IMessageFormatter
     {
-        bool CanConvert(Message message);
+        bool IsFormatSupported(Message message);
 
-        Response ConvertToResponse(Message message, Type valueType);
+        Request FormatRequest(Message message);
 
-        Request ConvertToRequest(Message message);
+        Response FormatResponse(Message message, Type valueType);
     }
 }

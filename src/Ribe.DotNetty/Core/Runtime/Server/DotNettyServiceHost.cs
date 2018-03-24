@@ -12,13 +12,13 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
     {
         private object _syncObject = new object();
 
-        private bool _started;
-
         private IChannelHandler _handler;
 
         private MultithreadEventLoopGroup _bossGroup;
 
         private MultithreadEventLoopGroup _workerGroup;
+
+        private ServerBootstrap _bootstrap;
 
         public int Port { get; }
 
@@ -32,16 +32,19 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
         {
             lock (_syncObject)
             {
-                if (!_started)
+                if (_bootstrap == null)
                 {
-                    new ServerBootstrap()
+                    _bossGroup = new MultithreadEventLoopGroup(1);
+                    _workerGroup = new MultithreadEventLoopGroup();
+
+                    _bootstrap = new ServerBootstrap()
                         .Group(_bossGroup, _workerGroup)
                         .Channel<TcpServerSocketChannel>()
                         .Option(ChannelOption.SoBacklog, 100)
                         .Handler(new LoggingHandler("SRV-LSTN"))
-                        .ChildHandler(_handler)
-                        .BindAsync(Port)
-                        .Wait();
+                        .ChildHandler(_handler);
+
+                    _bootstrap.BindAsync(Port).Wait();
                 }
 
                 return Task.CompletedTask;
@@ -52,17 +55,14 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
         {
             lock (_syncObject)
             {
-                if (_started)
+                if (_bossGroup != null)
                 {
-                    if (_bossGroup != null)
-                    {
-                        _bossGroup.ShutdownGracefullyAsync().Wait();
-                    }
+                    _bossGroup.ShutdownGracefullyAsync().Wait();
+                }
 
-                    if (_workerGroup != null)
-                    {
-                        _workerGroup.ShutdownGracefullyAsync().Wait();
-                    }
+                if (_workerGroup != null)
+                {
+                    _workerGroup.ShutdownGracefullyAsync().Wait();
                 }
             }
 

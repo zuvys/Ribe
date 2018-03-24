@@ -1,10 +1,12 @@
 ﻿using Ribe.Core;
 using Ribe.Messaging;
+using Ribe.Rpc.Core;
 using Ribe.Rpc.Core.Runtime.Client;
 using Ribe.Rpc.Transport;
 using Ribe.Serialize;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +45,7 @@ namespace Ribe.Client
                 throw new NotSupportedException($"the request content-type:{context.RequestHeaders[Constants.ContentType]} is not supported!");
             }
 
-            if (!long.TryParse(context.RequestHeaders[Constants.RequestId], out var id))
+            if (!long.TryParse(context.RequestHeaders.GetValueOrDefault(Constants.RequestId), out var id))
             {
                 id = Interlocked.Add(ref Seed, 1);
                 context.RequestHeaders[Constants.RequestId] = id.ToString();

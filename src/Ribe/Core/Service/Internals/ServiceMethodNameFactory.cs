@@ -4,16 +4,16 @@ using System.Text;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class ServiceMethodKeyFactory : IServiceMethodKeyFactory
+    public class ServiceMethodNameFactory : IServiceMethodNameFactory
     {
         private ILogger _logger;
 
-        public ServiceMethodKeyFactory(ILogger logger)
+        public ServiceMethodNameFactory(ILogger logger)
         {
             _logger = logger;
         }
 
-        public string CreateMethodKey(MethodInfo method)
+        public string CreateName(MethodInfo method)
         {
             var sb = new StringBuilder(method.Name);
 
