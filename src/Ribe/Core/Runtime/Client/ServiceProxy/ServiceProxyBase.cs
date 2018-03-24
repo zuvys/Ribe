@@ -11,7 +11,9 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
     /// </summary>
     public abstract class ServiceProxyBase
     {
-        internal static MethodInfo RemoteCallMethod { get; }
+        internal static MethodInfo InvokeServiceMethod { get; }
+
+        internal static MethodInfo InvokeServiceVoidMethod { get; }
 
         protected RequestHeader Options { get; }
 
@@ -19,7 +21,8 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 
         static ServiceProxyBase()
         {
-            RemoteCallMethod = typeof(ServiceProxyBase).GetMethod(nameof(InvokeService), BindingFlags.Instance | BindingFlags.NonPublic);
+            InvokeServiceMethod = typeof(ServiceProxyBase).GetMethod(nameof(InvokeService), BindingFlags.Instance | BindingFlags.NonPublic);
+            InvokeServiceVoidMethod = typeof(ServiceProxyBase).GetMethod(nameof(InvokeVoidService), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public ServiceProxyBase(IServiceInvokerProvider invokderProvider, RequestHeader options)
@@ -28,16 +31,21 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
             Options = options;
         }
 
-        protected object InvokeService(string methodKey, Type valueType, object[] paramterValues)
+        protected object InvokeService(string methodName, Type valueType, object[] paramterValues)
         {
-            var options = Options.Clone(new[] { new KeyValuePair<string, string>(Constants.ServiceMethodName, methodKey) });
-            var handler = InvokderProvider.GetInvoker();
-            if (handler == null)
+            var options = Options.Clone(new[] { new KeyValuePair<string, string>(Constants.ServiceMethodName, methodName) });
+            var invoker = InvokderProvider.GetInvoker();
+            if (invoker == null)
             {
-                throw new RpcException("get RequestHandler failed!");
+                throw new RpcException("get ServiceInvoker failed!");
             }
 
-            return handler.InvokeAsync(valueType, paramterValues, options).Result;
+            return invoker.InvokeAsync(valueType, paramterValues, options).Result;
+        }
+
+        protected void InvokeVoidService(string methodKey, Type valueType, object[] paramterValues)
+        {
+            InvokeService(methodKey, valueType, paramterValues);
         }
     }
 }

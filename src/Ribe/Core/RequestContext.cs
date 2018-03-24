@@ -18,14 +18,14 @@ namespace Ribe.Rpc.Core
 
         public RequestContext(Dictionary<string, string> headers, object[] paramterValues, Type responseValueType)
         {
-            IsVoidRequest = typeof(Task) == responseValueType || typeof(void) == responseValueType;
-            IsAsyncRequest = typeof(Task).IsAssignableFrom(responseValueType);
+            IsVoidRequest = responseValueType == null || typeof(Task) == responseValueType || typeof(void) == responseValueType;
+            IsAsyncRequest = responseValueType != null && typeof(Task).IsAssignableFrom(responseValueType);
 
             RequestHeaders = headers;
             RequestParamterValues = paramterValues;
 
-            ResponseValueType = IsAsyncRequest && !IsVoidRequest 
-                ? responseValueType.GetGenericArguments()[0] 
+            ResponseValueType = IsAsyncRequest && !IsVoidRequest
+                ? responseValueType.GetGenericArguments()[0]
                 : responseValueType;
         }
     }

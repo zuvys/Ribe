@@ -7,6 +7,11 @@ namespace ServiceInterface
     [Service(Version = "0.0.1")]
     public class ShopServiceImpl : IShopService
     {
+        public void Get(int i)
+        {
+            System.Console.WriteLine("dsfsda");
+        }
+
         public GoodsDto GetGoods(int id)
         {
             return new GoodsDto()
@@ -43,6 +48,11 @@ namespace ServiceInterface
                 System.Threading.Thread.Sleep(2000);
                 return GetGoods(id);
             });
+        }
+
+        public void Get(int i)
+        {
+            System.Console.WriteLine("dsfsda");
         }
     }
 }

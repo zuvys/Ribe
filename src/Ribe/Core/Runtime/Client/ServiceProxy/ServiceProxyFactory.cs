@@ -1,5 +1,6 @@
 ﻿using Ribe.Core;
 using Ribe.Core.Service;
+
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 
         private static ConcurrentDictionary<Type, Type> ServiceProxies { get; }
 
-        private IServiceMethodNameFactory _serviceMethodKeyFactory;
+        private IServiceMethodNameFactory _serviceMethodNameFactory;
 
         private Invoker.IServiceInvokerProvider _requestHandlerProvider;
 
@@ -44,7 +45,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
         )
         {
             _requestHandlerProvider = requestHandlerProvider;
-            _serviceMethodKeyFactory = serviceMethodKeyFactory;
+            _serviceMethodNameFactory = serviceMethodKeyFactory;
         }
 
         public TService CreateProxy<TService>(Func<RequestHeader> builder = null)
@@ -79,7 +80,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 
                 foreach (var item in serviceType.GetMethods())
                 {
-                    var serviceMethodKey = _serviceMethodKeyFactory.CreateName(item);
+                    var methodName = _serviceMethodNameFactory.CreateName(item);
                     var paramterInfos = item.GetParameters();
                     var paramterTypes = paramterInfos.Select(i => i.ParameterType).ToArray();
                     var methodBudiler = typeBudiler.DefineMethod(
@@ -88,11 +89,10 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
                            item.ReturnType,
                            paramterTypes);
 
-
                     il = methodBudiler.GetILGenerator();
 
                     il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldstr, serviceMethodKey);
+                    il.Emit(OpCodes.Ldstr, methodName);
                     il.Emit(OpCodes.Ldtoken, item.ReturnType);
                     il.Emit(OpCodes.Ldc_I4, paramterTypes.Length);
                     il.Emit(OpCodes.Newarr, typeof(object));
@@ -110,7 +110,15 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
                         }
                     }
 
-                    il.Emit(OpCodes.Call, ServiceProxyBase.RemoteCallMethod);
+                    if (item.ReturnType == typeof(void))
+                    {
+                        il.Emit(OpCodes.Call, ServiceProxyBase.InvokeServiceVoidMethod);
+                    }
+                    else
+                    {
+                        il.Emit(OpCodes.Call, ServiceProxyBase.InvokeServiceMethod);
+                    }
+
                     il.Emit(OpCodes.Ret);
                 }
 

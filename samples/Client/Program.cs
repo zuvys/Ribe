@@ -20,7 +20,7 @@ namespace Client
         static void Main(string[] args)
         {
             var serializer = new JsonSerializer();
-          
+
             var clientFacotry = new DotNettyServiceClientFactory(new SerializerProvider(
                 new[] { new JsonSerializer() }
                 ),
@@ -52,21 +52,29 @@ namespace Client
 
             try
             {
-                var goods = proxy.GetGoods(2);
-
-                Console.WriteLine("Sync Invoke GoodsName:" + goods.Name);
+                proxy.Get(2);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                Console.WriteLine(e.Message);
-            }
-            var awaiter = proxy.GetGoodsAsync(2).GetAwaiter();
 
-            awaiter.OnCompleted(() =>
-            {
-                var goods2 = awaiter.GetResult();
-                Console.WriteLine("Async Invoke GoodsName:" + goods2.Name);
-            });
+            }
+            //try
+            //{
+            //    var goods = proxy.GetGoods(2);
+
+            //    Console.WriteLine("Sync Invoke GoodsName:" + goods.Name);
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e.Message);
+            //}
+            //var awaiter = proxy.GetGoodsAsync(2).GetAwaiter();
+
+            //awaiter.OnCompleted(() =>
+            //{
+            //    var goods2 = awaiter.GetResult();
+            //    Console.WriteLine("Async Invoke GoodsName:" + goods2.Name);
+            //});
 
             Console.WriteLine("End");
             Console.ReadLine();
