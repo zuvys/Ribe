@@ -11,6 +11,7 @@
     <PackageReference Include="DotNetty.Common" Version="0.4.7" />
     <PackageReference Include="DotNetty.Handlers" Version="0.4.7" />
     <PackageReference Include="DotNetty.Transport" Version="0.4.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
   </ItemGroup>
 

@@ -10,11 +10,11 @@ namespace Ribe.Rpc.Server
     {
         private IRequestHandler _handler;
 
-        private IMessageFormatterProvider _messageConvertorProvider;
+        private IMessageFormatterManager _messageConvertorProvider;
 
         public MessageListener(
             IRequestHandler handler,
-            IMessageFormatterProvider messageConvertorProvider
+            IMessageFormatterManager messageConvertorProvider
         )
         {
             _handler = handler;

@@ -1,20 +1,25 @@
 ﻿using Ribe.Rpc.Core;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System;
+using Ribe.Rpc.Routing.Routers;
 
 namespace Ribe.Rpc.Routing
 {
     public class RouterManager : IRouterManager
     {
-        private List<IRouter> _routers;
+        private ConcurrentDictionary<Type, IRouter> _routers;
 
-        public RouterManager(List<IRouter> routers)
+        public RouterManager()
         {
-            _routers = routers ?? new List<IRouter>();
+            _routers = new ConcurrentDictionary<Type, IRouter>();
+
+            AddRouter(new ServiceMethodRouter());
         }
 
         public List<ServiceRoutingEntry> Route(List<ServiceRoutingEntry> routeEntries, RequestContext req)
         {
-            foreach (var router in _routers)
+            foreach (var router in _routers.Values)
             {
                 routeEntries = router.Route(routeEntries, req);
             }
@@ -24,18 +29,12 @@ namespace Ribe.Rpc.Routing
 
         public void AddRouter(IRouter router)
         {
-            if (!_routers.Contains(router))
-            {
-                _routers.Add(router);
-            }
+            _routers.AddOrUpdate(router.GetType(), router, (k, v) => router);
         }
 
         public void RemoveRouter(IRouter router)
         {
-            if (_routers.Contains(router))
-            {
-                _routers.Remove(router);
-            }
+            _routers.TryRemove(router.GetType(), out var _);
         }
     }
 }

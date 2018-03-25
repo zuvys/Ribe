@@ -17,9 +17,9 @@ namespace Ribe.Rpc.Zookeeper.Registry
 
         private ZkConfiguration _zkConfiguration;
 
-        private ISerializerProvider _serializerProvider;
+        private ISerializerManager _serializerProvider;
 
-        public ZkServiceRouteRegistrar(ZkConfiguration zkConfiguration, ISerializerProvider serializerProvider, ILogger logger)
+        public ZkServiceRouteRegistrar(ZkConfiguration zkConfiguration, ISerializerManager serializerProvider, ILogger logger)
         {
             _logger = logger;
             _zkConfiguration = zkConfiguration;

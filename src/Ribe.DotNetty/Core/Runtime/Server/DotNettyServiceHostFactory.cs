@@ -11,25 +11,25 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
 {
     public class DotNettyServiceHostFactory : IServiceHostFactory
     {
-        private IEncoderProvider _encoderProvider;
-
-        private IDecoderProvider _decoderProvider;
-
-        private ISerializerProvider _serializerProvider;
-
         private IMessageListener _listener;
+
+        private IEncoderManager _encoderManager;
+
+        private IDecoderManager _decoderManager;
+
+        private ISerializerManager _serializerManager;
 
         public DotNettyServiceHostFactory(
             IMessageListener listener,
-            IEncoderProvider encoderProvider,
-            IDecoderProvider decoderProvider,
-            ISerializerProvider serializerProvider
+            IEncoderManager encoderManager,
+            IDecoderManager decoderManager,
+            ISerializerManager serializerManager
         )
         {
             _listener = listener;
-            _encoderProvider = encoderProvider;
-            _decoderProvider = decoderProvider;
-            _serializerProvider = serializerProvider;
+            _encoderManager = encoderManager;
+            _decoderManager = decoderManager;
+            _serializerManager = serializerManager;
         }
 
         public IServiceHost Create(int port)
@@ -38,9 +38,9 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
             {
                 channel.Pipeline.AddLast(new LengthFieldPrepender(4));
                 channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 4, 0, 4));
-                channel.Pipeline.AddLast(new DotNettyChannelDecoderHandlerAdapter(_decoderProvider));
-                channel.Pipeline.AddLast(new DotNettyChannelEncoderHandlerAdapter(_encoderProvider));
-                channel.Pipeline.AddLast(new DotNettyChannelServerHandlerAdapter(_listener, _serializerProvider));
+                channel.Pipeline.AddLast(new DotNettyChannelDecoderHandlerAdapter(_decoderManager));
+                channel.Pipeline.AddLast(new DotNettyChannelEncoderHandlerAdapter(_encoderManager));
+                channel.Pipeline.AddLast(new DotNettyChannelServerHandlerAdapter(_listener, _serializerManager));
             }));
         }
     }

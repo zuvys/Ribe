@@ -18,7 +18,7 @@ namespace Ribe.Client
 
         protected IMessageSender Sender { get; }
 
-        protected ISerializerProvider SerializerProvider { get; }
+        protected ISerializerManager SerializerProvider { get; }
 
         protected ConcurrentDictionary<long, TaskCompletionSource<Message>> Map { get; }
 
@@ -29,7 +29,7 @@ namespace Ribe.Client
 
         public ServiceClient(
             IMessageSender sender,
-            ISerializerProvider serializerProvider,
+            ISerializerManager serializerProvider,
             ConcurrentDictionary<long, TaskCompletionSource<Message>> map)
         {
             Map = map ?? throw new NullReferenceException(nameof(map));

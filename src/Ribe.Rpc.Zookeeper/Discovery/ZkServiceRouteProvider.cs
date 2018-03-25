@@ -21,11 +21,11 @@ namespace Ribe.Rpc.Zookeeper.Discovery
 
         private ZkConfiguration _zkConfiguration;
 
-        private ISerializerProvider _serializerProvider;
+        private ISerializerManager _serializerProvider;
 
         private ConcurrentDictionary<string, List<ServiceRoutingEntry>> _caches;
 
-        public ZkServiceRouteProvider(ZkConfiguration zkConfiguration, ISerializerProvider serializerProvider, ILogger logger)
+        public ZkServiceRouteProvider(ZkConfiguration zkConfiguration, ISerializerManager serializerProvider, ILogger logger)
         {
             _logger = logger;
             _zkConfiguration = zkConfiguration;

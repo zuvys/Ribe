@@ -27,12 +27,12 @@ namespace Ribe.DotNetty.Client
 
         private ConcurrentDictionary<long, TaskCompletionSource<Message>> _map;
 
-        private ISerializerProvider _serializerProvider;
+        private ISerializerManager _serializerProvider;
 
         public DotNettyServiceClientFactory(
-            ISerializerProvider serializerProvider,
-            IEncoderProvider encoderProvider,
-            IDecoderProvider decoderProvider
+            ISerializerManager serializerProvider,
+            IEncoderManager encoderProvider,
+            IDecoderManager decoderProvider
          )
         {
             _serializerProvider = serializerProvider;

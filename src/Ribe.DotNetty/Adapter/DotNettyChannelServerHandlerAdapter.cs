@@ -13,9 +13,9 @@ namespace Ribe.DotNetty.Adapter
     {
         private IMessageListener _listener;
 
-        private ISerializerProvider _serializerProvider;
+        private ISerializerManager _serializerProvider;
 
-        public DotNettyChannelServerHandlerAdapter(IMessageListener listener, ISerializerProvider serializerProvider)
+        public DotNettyChannelServerHandlerAdapter(IMessageListener listener, ISerializerManager serializerProvider)
         {
             _listener = listener;
             _serializerProvider = serializerProvider;

@@ -11,9 +11,9 @@ namespace Ribe.DotNetty.Adapter
 {
     public class DotNettyChannelDecoderHandlerAdapter : ByteToMessageDecoder
     {
-        private IDecoderProvider _decoderProvider;
+        private IDecoderManager _decoderProvider;
 
-        public DotNettyChannelDecoderHandlerAdapter(IDecoderProvider decoderProvider)
+        public DotNettyChannelDecoderHandlerAdapter(IDecoderManager decoderProvider)
         {
             _decoderProvider = decoderProvider;
         }

@@ -14,7 +14,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
     {
         private IServiceClientFacotry _clientFacotry;
 
-        private IMessageFormatterProvider _formatterProvider;
+        private IMessageFormatterManager _formatterProvider;
 
         private IServiceAddressSelector _selector;
 
@@ -23,7 +23,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
         public ServiceInvokderProvider(
             IServiceRouteProvider routeProvider,
             IServiceClientFacotry clientFacotry,
-            IMessageFormatterProvider formatterProvider
+            IMessageFormatterManager formatterProvider
         )
         {
             _routeProvider = routeProvider;
@@ -34,14 +34,18 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
 
         public IServiceInvoker GetInvoker(RequestContext req)
         {
-            var routes = new RouterManager(new List<IRouter> { new ServiceMethodRouter() })
-                  .Route(_routeProvider.GetRoutes(req.Header[Constants.ServiceName]), req);
+            //var routes = new RouterManager(new List<IRouter> { new ServiceMethodRouter() })
+            //      .Route(_routeProvider.GetRoutes(req.Header[Constants.ServiceName]), req);
 
-            var host = _selector.Select(routes.Select(i => i.Address).ToList(), req);
+            //var host = _selector.Select(routes.Select(i => i.Address).ToList(), req);
 
             return new ServiceInvoker(_clientFacotry, _formatterProvider)
             {
-                Address = host
+                Address = new ServiceAddress
+                {
+                    Ip = "127.0.0.1",
+                    Port = 8080
+                }
             };
         }
     }

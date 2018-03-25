@@ -11,9 +11,9 @@ namespace Ribe.DotNetty.Adapter
 {
     public class DotNettyChannelEncoderHandlerAdapter : MessageToMessageEncoder<Message>
     {
-        private IEncoderProvider _encoderProvider;
+        private IEncoderManager _encoderProvider;
 
-        public DotNettyChannelEncoderHandlerAdapter(IEncoderProvider encoderProvider)
+        public DotNettyChannelEncoderHandlerAdapter(IEncoderManager encoderProvider)
         {
             _encoderProvider = encoderProvider;
         }

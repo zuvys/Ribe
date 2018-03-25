@@ -13,13 +13,13 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
     {
         private IServiceClientFacotry _clientFactory;
 
-        private IMessageFormatterProvider _formatterProvider;
+        private IMessageFormatterManager _formatterProvider;
 
         public ServiceAddress Address { get; internal set; }
 
         public ServiceInvoker(
             IServiceClientFacotry clientFactory, 
-            IMessageFormatterProvider formatterProvider
+            IMessageFormatterManager formatterProvider
         )
         {
             _clientFactory = clientFactory;
