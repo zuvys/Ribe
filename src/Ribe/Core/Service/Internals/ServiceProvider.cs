@@ -36,7 +36,7 @@ namespace Ribe.Core.Service.Internals
 
         public ServiceEntry GetEntry(Request context)
         {
-            return Cache.Get(context.ServicePath);
+            return Cache.Get(context.ServiceName);
         }
     }
 }

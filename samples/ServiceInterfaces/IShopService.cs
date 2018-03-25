@@ -5,11 +5,13 @@ namespace ServiceInterfaces
 {
     public interface IShopService
     {
-        //GoodsDto GetGoods(int id);
+        GoodsDto GetGoods(int id);
 
-        //Task<GoodsDto> GetGoodsAsync(int id);
+        Task<GoodsDto> GetGoodsAsync(int id);
 
         void Get(int i);
+
+        void Set(int i);
     }
 
     public class GoodsDto

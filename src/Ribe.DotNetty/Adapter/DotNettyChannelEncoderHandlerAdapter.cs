@@ -22,7 +22,7 @@ namespace Ribe.DotNetty.Adapter
         {
             if (input != null)
             {
-                var contentType = input.Headers.GetValueOrDefault(Constants.ContentType);
+                var contentType = input.Header.GetValueOrDefault(Constants.ContentType);
                 if (string.IsNullOrEmpty(contentType))
                 {
                     throw new NotSupportedException($"the ContentType with empty is not supported!");

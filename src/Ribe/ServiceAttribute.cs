@@ -8,23 +8,13 @@ namespace Ribe.Core
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
     public class ServiceAttribute : Attribute
     {
-        public int Timeout { get; set; }
+        public string Group { get; set; } = Constants.DefaultGroup;
 
-        public string Group { get; set; }
-
-        public string Version { get; set; }
+        public string Version { get; set; } = Constants.DefaultVersion;
 
         public ServiceAttribute()
         {
-            if (String.IsNullOrEmpty(Version))
-            {
-                Version = "0.0.0";
-            }
 
-            if (Group == null)
-            {
-                Group = "default";
-            }
         }
     }
 }

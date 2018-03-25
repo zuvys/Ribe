@@ -5,6 +5,6 @@ namespace Ribe.Core.Service
 {
     public interface IServiceMethodNameMapFactory
     {
-        Dictionary<string, ServiceMethod> CreateMethodMap(Type @interface, Type servieType);
+        Dictionary<string, ServiceMethod> CreateMap(Type @interface, Type servieType);
     }
 }

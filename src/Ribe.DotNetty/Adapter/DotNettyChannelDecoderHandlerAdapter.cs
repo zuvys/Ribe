@@ -20,6 +20,11 @@ namespace Ribe.DotNetty.Adapter
 
         protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
         {
+            if (input.Capacity == 0)
+            {
+                return;
+            }
+
             var content = new byte[input.Capacity - input.Array[input.ArrayOffset] - 1];
             var contentType = Encoding.UTF8.GetString(
                 input.Array,

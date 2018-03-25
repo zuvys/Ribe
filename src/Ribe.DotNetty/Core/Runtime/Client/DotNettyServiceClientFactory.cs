@@ -52,7 +52,7 @@ namespace Ribe.DotNetty.Client
                     channel.Pipeline.AddLast(new DotNettyChannelEncoderHandlerAdapter(encoderProvider));
                     channel.Pipeline.AddLast(new DotNettyChannelClientHandlerAdapter((message) =>
                     {
-                        var requestId = message.Headers.GetValueOrDefault(Constants.RequestId);
+                        var requestId = message.Header.GetValueOrDefault(Constants.RequestId);
                         if (requestId == null)
                         {
                             throw new Exception($"Response Headers not constains {Constants.RequestId} key");

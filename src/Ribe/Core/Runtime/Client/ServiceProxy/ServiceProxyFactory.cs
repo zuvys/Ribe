@@ -1,5 +1,5 @@
-﻿using Ribe.Core;
-using Ribe.Core.Service;
+﻿using Ribe.Core.Service;
+using Ribe.Rpc.Core.Runtime.Client.Invoker;
 
 using System;
 using System.Collections.Concurrent;
@@ -21,34 +21,36 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 
         internal static ModuleBuilder ModuleBuilder { get; }
 
-        private static ConcurrentDictionary<Type, Type> ServiceProxies { get; }
+        private static ConcurrentDictionary<Type, Type> ProxyCache { get; }
 
         private IServiceMethodNameFactory _serviceMethodNameFactory;
 
-        private Invoker.IServiceInvokerProvider _requestHandlerProvider;
+        private IServiceInvokerProvider _invokerProvider;
+
+        private IServiceNameFacotry _serviceNameFacotry;
 
         static ServiceProxyFactory()
         {
             AssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(AssemblyName), AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder = AssemblyBuilder.DefineDynamicModule(ModuleName);
-            ServiceProxies = new ConcurrentDictionary<Type, Type>();
+            ProxyCache = new ConcurrentDictionary<Type, Type>();
         }
 
         /// <summary>
         /// ctor
         /// </summary>
-        /// <param name="serviceInvokerProvider"></param>
-        /// <param name="serviceMethodKeyFactory"></param>
         public ServiceProxyFactory(
-            Invoker.IServiceInvokerProvider requestHandlerProvider,
-            IServiceMethodNameFactory serviceMethodKeyFactory
+            IServiceInvokerProvider invokerProvider,
+            IServiceNameFacotry serviceNameFacotry,
+            IServiceMethodNameFactory serviceMethodNameFactory
         )
         {
-            _requestHandlerProvider = requestHandlerProvider;
-            _serviceMethodNameFactory = serviceMethodKeyFactory;
+            _invokerProvider = invokerProvider;
+            _serviceNameFacotry = serviceNameFacotry;
+            _serviceMethodNameFactory = serviceMethodNameFactory;
         }
 
-        public TService CreateProxy<TService>(Func<RequestHeader> builder = null)
+        public TService CreateProxy<TService>()
         {
             var type = typeof(TService);
             if (!type.IsInterface)
@@ -56,7 +58,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
                 throw new NotSupportedException($"type :{type.FullName} is not an interface type");
             }
 
-            var proxy = ServiceProxies.GetOrAdd(type, (serviceType) =>
+            var proxy = ProxyCache.GetOrAdd(type, (serviceType) =>
             {
                 var typeBudiler = ModuleBuilder.DefineType(
                     ProxyTypePrefix + "_" + serviceType.Namespace.Replace(".", "_") + "_" + serviceType.Name,
@@ -64,7 +66,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(Invoker.IServiceInvokerProvider), typeof(RequestHeader) };
+                var ctorTypes = new[] { typeof(IServiceInvokerProvider), typeof(IServiceNameFacotry) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,
@@ -125,11 +127,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
                 return typeBudiler.CreateType();
             });
 
-            var options = builder != null ? builder() : new RequestHeader();
-
-            //TODO:ServicePath在服务端生成
-            options[Constants.ServicePath] = $"/{ options[Constants.Group]}/{ type.Namespace + "." + type.Name}/{options[Constants.Version]}/";
-            return (TService)Activator.CreateInstance(proxy, _requestHandlerProvider, options);
+            return (TService)Activator.CreateInstance(proxy, _invokerProvider, _serviceNameFacotry);
         }
     }
 }

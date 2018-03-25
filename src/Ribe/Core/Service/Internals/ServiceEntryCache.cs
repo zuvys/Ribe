@@ -13,17 +13,17 @@ namespace Ribe.Core.Service
 
         public void AddOrUpdate(ServiceEntry service)
         {
-            Services.AddOrUpdate(service.ServicePath, service, (k, v) => service);
+            Services.AddOrUpdate(service.ServiceName, service, (k, v) => service);
         }
 
-        public ServiceEntry Get(string servicePath)
+        public ServiceEntry Get(string serviceName)
         {
-            return Services.TryGetValue(servicePath, out var service) ? service :null ;
+            return Services.TryGetValue(serviceName, out var service) ? service :null ;
         }
 
         public bool Remove(ServiceEntry service)
         {
-            return Services.TryRemove(service.ServicePath, out service);
+            return Services.TryRemove(service.ServiceName, out service);
         }
     }
 }

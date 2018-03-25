@@ -9,27 +9,27 @@ namespace Ribe.Core
 
         public long RequestId { get; }
 
-        public Dictionary<string, string> Headers { get; }
+        public Header Header { get; }
 
-        public string ServicePath => Headers.GetValueOrDefault(Constants.ServicePath);
+        public string ServiceName => Header.GetValueOrDefault(Constants.ServiceName);
 
-        public string ServiceMethodKey => Headers.GetValueOrDefault(Constants.ServiceMethodName);
+        public string ServiceMethodKey => Header.GetValueOrDefault(Constants.ServiceMethodName);
 
         public Func<Type[], object[]> ParamterValuesProvider { get; }
 
         public Request(
             byte[] body,
-            Dictionary<string, string> headers,
+            Header header,
             Func<Type[], object[]> paramterValuesProvider
         )
         {
-            if (!long.TryParse(headers.GetValueOrDefault(Constants.RequestId), out var id))
+            if (!long.TryParse(header.GetValueOrDefault(Constants.RequestId), out var id))
             {
                 throw new ArgumentException("RequestId Key must be numberic");
             }
 
             Body = body;
-            Headers = headers;
+            Header = header;
             RequestId = id;
             ParamterValuesProvider = paramterValuesProvider;
         }

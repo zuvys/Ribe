@@ -10,12 +10,12 @@ namespace Ribe.Rpc.Json.Messaging
     {
         public bool IsFormatSupported(Message message)
         {
-            if (message == null || message.Headers == null)
+            if (message == null || message.Header == null)
             {
                 return false;
             }
 
-            return message.Headers.GetValueOrDefault(Constants.ContentType).ToLower() == "json";
+            return message.Header.GetValueOrDefault(Constants.ContentType).ToLower() == "json";
         }
 
         public Response FormatResponse(Message message, Type valueType)
@@ -36,7 +36,7 @@ namespace Ribe.Rpc.Json.Messaging
 
         public Request FormatRequest(Message message)
         {
-            return new Request(message.Content, message.Headers, (parameterTypes) =>
+            return new Request(message.Content, message.Header, (parameterTypes) =>
             {
                 if (parameterTypes == null || parameterTypes.Length == 0)
                 {

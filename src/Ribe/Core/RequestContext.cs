@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ribe.Core;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,18 +11,18 @@ namespace Ribe.Rpc.Core
 
         public object[] RequestParamterValues { get; }
 
-        public Dictionary<string, string> RequestHeaders { get; }
+        public Header Header { get; }
 
         public bool IsVoidRequest { get; }
 
         public bool IsAsyncRequest { get; }
 
-        public RequestContext(Dictionary<string, string> headers, object[] paramterValues, Type responseValueType)
+        public RequestContext(Header header, object[] paramterValues, Type responseValueType)
         {
             IsVoidRequest = responseValueType == null || typeof(Task) == responseValueType || typeof(void) == responseValueType;
             IsAsyncRequest = responseValueType != null && typeof(Task).IsAssignableFrom(responseValueType);
 
-            RequestHeaders = headers;
+            Header = header;
             RequestParamterValues = paramterValues;
 
             ResponseValueType = IsAsyncRequest && !IsVoidRequest

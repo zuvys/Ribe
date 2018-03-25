@@ -18,5 +18,10 @@ namespace Ribe.Core.Service.Address
 
             return new IPEndPoint(address, Port);
         }
+
+        public override string ToString()
+        {
+            return $"{Ip}:{Port}";
+        }
     }
 }

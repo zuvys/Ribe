@@ -39,20 +39,20 @@ namespace Ribe.Client
 
         public virtual async Task<Message> SendRequestAsync(RequestContext context)
         {
-            var serializer = SerializerProvider.GetSerializer(context.RequestHeaders[Constants.ContentType]);
+            var serializer = SerializerProvider.GetSerializer(context.Header[Constants.ContentType]);
             if (serializer == null)
             {
-                throw new NotSupportedException($"the request content-type:{context.RequestHeaders[Constants.ContentType]} is not supported!");
+                throw new NotSupportedException($"the request content-type:{context.Header[Constants.ContentType]} is not supported!");
             }
 
-            if (!long.TryParse(context.RequestHeaders.GetValueOrDefault(Constants.RequestId), out var id))
+            if (!long.TryParse(context.Header.GetValueOrDefault(Constants.RequestId), out var id))
             {
                 id = Interlocked.Add(ref Seed, 1);
-                context.RequestHeaders[Constants.RequestId] = id.ToString();
+                context.Header[Constants.RequestId] = id.ToString();
             }
 
             await Sender.SendAsync(new Message(
-                  context.RequestHeaders,
+                  context.Header,
                   serializer.SerializeObject(context.RequestParamterValues)));
 
             if (context.IsVoidRequest)

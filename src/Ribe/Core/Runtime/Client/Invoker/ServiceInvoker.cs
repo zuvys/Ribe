@@ -13,26 +13,27 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
     {
         private IServiceClientFacotry _clientFactory;
 
-        private IMessageFormatterProvider _convertorProvider;
+        private IMessageFormatterProvider _formatterProvider;
 
-        public ServiceAddress ServiceAddress { get; internal set; }
+        public ServiceAddress Address { get; internal set; }
 
-        public ServiceInvoker(IServiceClientFacotry clientFactory, IMessageFormatterProvider convetorProvider)
+        public ServiceInvoker(
+            IServiceClientFacotry clientFactory, 
+            IMessageFormatterProvider formatterProvider
+        )
         {
             _clientFactory = clientFactory;
-            _convertorProvider = convetorProvider;
+            _formatterProvider = formatterProvider;
         }
 
-        public async Task<object> InvokeAsync(Type valueType, object[] paramterValues, RequestHeader header)
+        public async Task<object> InvokeAsync(RequestContext req)
         {
-            var context = new RequestContext(header, paramterValues, valueType);
-            var client = _clientFactory.Create(ServiceAddress);
+            var client = _clientFactory.Create(Address);
+            var message = await client.SendRequestAsync(req);
 
-            var message = await client.SendRequestAsync(context);
-
-            if (context.IsVoidRequest)
+            if (req.IsVoidRequest)
             {
-                return context.IsAsyncRequest ? Task.CompletedTask : null;
+                return req.IsAsyncRequest ? Task.CompletedTask : null;
             }
 
             if (message == null)
@@ -40,13 +41,13 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
                 throw new NullReferenceException(nameof(message));
             }
 
-            var convertor = _convertorProvider.GetFormatter(message);
+            var convertor = _formatterProvider.GetFormatter(message);
             if (convertor == null)
             {
                 throw new NotSupportedException("not supported!");
             }
 
-            var data = convertor.FormatResponse(message, context.ResponseValueType);
+            var data = convertor.FormatResponse(message, req.ResponseValueType);
             if (data == null)
             {
                 throw new RpcException("return value is null");
@@ -57,7 +58,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
                 throw new RpcException(data.Error);
             }
 
-            return context.IsAsyncRequest ? Task.FromResult(data.Data) : data.Data;
+            return req.IsAsyncRequest ? Task.FromResult(data.Data) : data.Data;
         }
     }
 }

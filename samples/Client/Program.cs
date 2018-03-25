@@ -12,6 +12,7 @@ using Ribe.Rpc.Logging;
 using Ribe.Serialize;
 using ServiceInterfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace Client
 {
@@ -34,7 +35,19 @@ namespace Client
 
             var serviceMethodKeyFacotry = new ServiceMethodNameFactory(new NullLogger());
 
+            var pr = new Ribe.Rpc.Zookeeper.Discovery.ZkServiceRouteProvider(
+         new Ribe.Rpc.Zookeeper.ZkConfiguration()
+         {
+             Address = "127.0.0.1:2181",
+             RootPath = "/ribe/services",
+             SessionTimeout = 1000 * 60 * 20
+         },
+         new SerializerProvider(new[] { JsonSerializer.Default }),
+            NullLogger.Instance
+         );
+
             var serviceInvokerProvider = new ServiceInvokderProvider(
+                pr,
                 clientFacotry,
                 new MessageFormatterProvider(
                     new[] {
@@ -43,21 +56,26 @@ namespace Client
                     )
             );
 
-            var factory = new ServiceProxyFactory(serviceInvokerProvider, serviceMethodKeyFacotry);
 
-            var proxy = factory.CreateProxy<IShopService>(
-                () => new RequestHeader());
+            var factory = new ServiceProxyFactory(serviceInvokerProvider, new ServiceNameFactory(NullLogger.Instance), serviceMethodKeyFacotry);
+
+            var proxy = factory.CreateProxy<IShopService>();
 
             Console.WriteLine("Begin");
 
-            try
+            while (true)
             {
                 proxy.Get(2);
+                System.Threading.Thread.Sleep(1000);
             }
-            catch(Exception e)
-            {
 
-            }
+            var x = 1;
+            //Task.Run(() =>
+            //{
+            //    proxy.Get(2);
+            //    proxy.Set(2);
+            //});
+
             //try
             //{
             //    var goods = proxy.GetGoods(2);

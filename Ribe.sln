@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceInterfaces", "sample
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8BFBB9D7-601F-4D4F-9971-A06B98C0C7D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ribe.Rpc.Zookeeper", "src\Ribe.Rpc.Zookeeper\Ribe.Rpc.Zookeeper.csproj", "{8BFCC921-3192-4E72-891B-03B672EA215E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{BC948830-5F88-44E0-93E0-80867C7A9819}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC948830-5F88-44E0-93E0-80867C7A9819}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC948830-5F88-44E0-93E0-80867C7A9819}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BFCC921-3192-4E72-891B-03B672EA215E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BFCC921-3192-4E72-891B-03B672EA215E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BFCC921-3192-4E72-891B-03B672EA215E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BFCC921-3192-4E72-891B-03B672EA215E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{96709952-6486-4A56-89A4-66AFC27CB5E5} = {14FADD1E-64F0-4739-B5BC-2D310D1F7C7A}
 		{C09858B2-95F1-4145-87B6-6FD04767D30D} = {14FADD1E-64F0-4739-B5BC-2D310D1F7C7A}
 		{BC948830-5F88-44E0-93E0-80867C7A9819} = {14FADD1E-64F0-4739-B5BC-2D310D1F7C7A}
+		{8BFCC921-3192-4E72-891B-03B672EA215E} = {5C21B9F2-04A0-4027-97B1-042719F317E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F87328FA-8CD7-4328-A7B6-A054BC0122CF}

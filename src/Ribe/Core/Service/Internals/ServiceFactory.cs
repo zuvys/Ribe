@@ -7,19 +7,19 @@ namespace Ribe.Core.Service.Internals
 {
     public class ServiceFactory : IServiceFactory
     {
-        private IServiceMethodNameMapFactory _serviceMethodMapFactory;
+        private IServiceMethodNameMapFactory _methodNameMapFactory;
 
-        private IServicePathFacotry _servicePathFacotry;
+        private IServiceNameFacotry _serviceNameFacotry;
 
         private ILogger _logger;
 
         public ServiceFactory(
-            IServicePathFacotry servicePathFacotry,
-            IServiceMethodNameMapFactory serviceMethodMapFactory,
+            IServiceNameFacotry serviceNameFacotry,
+            IServiceMethodNameMapFactory methodNameMapFactory,
             ILogger logger)
         {
-            _servicePathFacotry = servicePathFacotry;
-            _serviceMethodMapFactory = serviceMethodMapFactory;
+            _serviceNameFacotry = serviceNameFacotry;
+            _methodNameMapFactory = methodNameMapFactory;
             _logger = logger;
         }
 
@@ -31,28 +31,29 @@ namespace Ribe.Core.Service.Internals
             }
 
             var attr = GetServiceAttribute(serviceType);
-            var services = new List<ServiceEntry>();
+            var serviceEntries = new List<ServiceEntry>();
 
             foreach (var def in serviceType.GetInterfaces())
             {
-                var service = new ServiceEntry()
-                {
-                    Attribute = attr,
-                    Interface = def,
-                    Implemention = serviceType,
-                    MethodMap = _serviceMethodMapFactory.CreateMethodMap(def, serviceType),
-                    ServicePath = _servicePathFacotry.CreatePath(def, attr)
-                };
-
-                if (service.MethodMap.Count == 0)
+                var map = _methodNameMapFactory.CreateMap(def, serviceType);
+                if (map.Count == 0)
                 {
                     continue;
                 }
 
-                services.Add(service);
+                var serviceName = _serviceNameFacotry.CreateName(def, attr);
+                var serviceEntry = new ServiceEntry()
+                {
+                    Attribute = attr,
+                    ServiceType = serviceType,
+                    Methods = map,
+                    ServiceName = _serviceNameFacotry.CreateName(def, attr)
+                };
+
+                serviceEntries.Add(serviceEntry);
             }
 
-            return services;
+            return serviceEntries;
         }
 
         private static ServiceAttribute GetServiceAttribute(Type serviceType)

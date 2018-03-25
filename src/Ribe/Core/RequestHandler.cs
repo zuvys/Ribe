@@ -28,7 +28,7 @@ namespace Ribe.Core
                 return;
             }
 
-            var method = entry.MethodMap.GetValueOrDefault(req.Headers[Constants.ServiceMethodName]);
+            var method = entry.Methods.GetValueOrDefault(req.Header[Constants.ServiceMethodName]);
             if (method == null)
             {
                 await reqCallBack(req.RequestId, Response.Create(null, "service method not found!", Status.MethodNotFound));
@@ -40,7 +40,7 @@ namespace Ribe.Core
 
             var context = new ExecutionContext()
             {
-                ServiceType = entry.Implemention,
+                ServiceType = entry.ServiceType,
                 ServiceMethod = method,
                 ParamterValues = parameterValues
             };

@@ -4,6 +4,7 @@ using Ribe.Messaging;
 using Ribe.Rpc.Transport;
 
 using DotNetty.Transport.Channels;
+using System;
 
 namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
 {
@@ -18,7 +19,7 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
 
         public Task SendAsync(Message message)
         {
-            return _context.WriteAndFlushAsync(message);
+            return _context.WriteAsync(message);
         }
     }
 }

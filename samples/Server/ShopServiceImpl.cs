@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Ribe.Core;
+﻿using Ribe.Core;
 using ServiceInterfaces;
+using System.Threading.Tasks;
 
 namespace ServiceInterface
 {
@@ -9,7 +9,7 @@ namespace ServiceInterface
     {
         public void Get(int i)
         {
-            System.Console.WriteLine("dsfsda");
+  
         }
 
         public GoodsDto GetGoods(int id)
@@ -25,6 +25,11 @@ namespace ServiceInterface
         public Task<GoodsDto> GetGoodsAsync(int id)
         {
             return Task.FromResult(GetGoods(id));
+        }
+
+        public void Set(int i)
+        {
+            
         }
     }
 
@@ -52,7 +57,12 @@ namespace ServiceInterface
 
         public void Get(int i)
         {
-            System.Console.WriteLine("dsfsda");
+          
+        }
+
+        public void Set(int i)
+        {
+
         }
     }
 }

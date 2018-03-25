@@ -25,3 +25,5 @@
 /src/Ribe.Json/bin/Debug/netcoreapp2.0
 /src/Ribe.Json/obj
 /src/Ribe.Server/obj
+/src/Ribe.Rpc.Zookeeper/bin/Debug/netcoreapp2.0
+/src/Ribe.Rpc.Zookeeper/obj

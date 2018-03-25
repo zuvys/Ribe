@@ -16,7 +16,7 @@ namespace Ribe.Core.Service.Internals
             _logger = logger;
         }
 
-        public Dictionary<string, ServiceMethod> CreateMethodMap(Type @interface, Type servieType)
+        public Dictionary<string, ServiceMethod> CreateMap(Type @interface, Type servieType)
         {
             var map = servieType.GetInterfaceMap(@interface);
             var nameMap = new Dictionary<string, ServiceMethod>();

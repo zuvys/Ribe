@@ -4,21 +4,6 @@ namespace Ribe.Rpc.Logging
 {
     public static class LoggerExtension
     {
-        public static void Trace(this ILogger logger, string log)
-        {
-            logger.Log(LogLevel.Trace, log, null);
-        }
-
-        public static void Trace(this ILogger logger, Exception e)
-        {
-            logger.Log(LogLevel.Trace, null, e);
-        }
-
-        public static void Trace(this ILogger logger, string log, Exception e)
-        {
-            logger.Log(LogLevel.Trace, log, e);
-        }
-
         public static void Debug(this ILogger logger, string log)
         {
             logger.Log(LogLevel.Debug, log, null);
@@ -77,6 +62,21 @@ namespace Ribe.Rpc.Logging
         public static void Error(this ILogger logger, string log, Exception e)
         {
             logger.Log(LogLevel.Warn, log, e);
+        }
+
+        public static void Fatal(this ILogger logger, string log)
+        {
+            logger.Log(LogLevel.Fatal, log, null);
+        }
+
+        public static void Fatal(this ILogger logger, Exception e)
+        {
+            logger.Log(LogLevel.Fatal, null, e);
+        }
+
+        public static void Fatal(this ILogger logger, string log, Exception e)
+        {
+            logger.Log(LogLevel.Fatal, log, e);
         }
     }
 }

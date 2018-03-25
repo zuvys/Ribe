@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Ribe.Core;
+using System;
 
 namespace Ribe.Messaging
 {
@@ -7,15 +7,15 @@ namespace Ribe.Messaging
     {
         public byte[] Content { get; set; }
 
-        public Dictionary<string, string> Headers { get; set; }
+        public Header Header { get; set; }
 
-        public bool IsRequest => Headers.ContainsKey(Constants.RequestKey);
+        //public bool IsRequest => Header.ContainsKey(Constants.RequestKey);
 
-        public bool IsResponse => Headers.ContainsKey(Constants.ResponseKey);
+        //public bool IsResponse => Header.ContainsKey(Constants.ResponseKey);
 
-        public Message(Dictionary<string, string> headers, byte[] content)
+        public Message(Header header, byte[] content)
         {
-            Headers = headers ?? throw new NullReferenceException(nameof(headers));
+            Header = header ?? throw new NullReferenceException(nameof(header));
             Content = content;
         }
     }

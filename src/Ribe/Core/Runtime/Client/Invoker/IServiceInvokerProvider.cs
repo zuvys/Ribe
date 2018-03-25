@@ -2,6 +2,6 @@
 {
     public interface IServiceInvokerProvider
     {
-        IServiceInvoker GetInvoker(/*参数后续考虑*/);
+        IServiceInvoker GetInvoker(RequestContext req);
     }
 }
