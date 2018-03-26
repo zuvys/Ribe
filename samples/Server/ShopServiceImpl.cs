@@ -9,7 +9,7 @@ namespace ServiceInterface
     {
         public void Get(int i)
         {
-  
+            System.Console.WriteLine("0.0.1");
         }
 
         public GoodsDto GetGoods(int id)
@@ -29,7 +29,7 @@ namespace ServiceInterface
 
         public void Set(int i)
         {
-            
+
         }
     }
 
@@ -57,7 +57,7 @@ namespace ServiceInterface
 
         public void Get(int i)
         {
-          
+            System.Console.WriteLine("0.0.2");
         }
 
         public void Set(int i)

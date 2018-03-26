@@ -13,7 +13,7 @@ namespace Ribe.Rpc.Zookeeper
     {
         public static IRpcServerBuilder AddZookpeer(this IRpcServerBuilder rpcBuilder, Func<ZkConfiguration> configurationBuilder)
         {
-            rpcBuilder.ServiceCollection.AddSingleton<IServiceRouteRegistrar>((p)
+            rpcBuilder.ServiceCollection.AddSingleton<IRoutingEntryRegistrar>((p)
                 => new ZkServiceRouteRegistrar(
                     configurationBuilder(),
                     p.GetRequiredService<ISerializerManager>(),
@@ -26,7 +26,7 @@ namespace Ribe.Rpc.Zookeeper
 
         public static IRpcClientBuilder AddZookpeer(this IRpcClientBuilder rpcBuilder, Func<ZkConfiguration> configurationBuilder)
         {
-            rpcBuilder.ServiceCollection.AddSingleton<IServiceRouteProvider>((p)
+            rpcBuilder.ServiceCollection.AddSingleton<IRoutingEntryProvider>((p)
                 => new ZkServiceRouteProvider(
                     configurationBuilder(),
                     p.GetRequiredService<ISerializerManager>(),

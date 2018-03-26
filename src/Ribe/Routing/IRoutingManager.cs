@@ -1,6 +1,6 @@
 ﻿namespace Ribe.Rpc.Routing
 {
-    public interface IRouterManager : IRouter
+    public interface IRoutingManager : IRouter
     {
         void AddRouter(IRouter router);
 

@@ -11,9 +11,9 @@ namespace Ribe.Core
     {
         private IServiceExecutor _executor;
 
-        private Service.IServiceProvider _entryProvider;
+        private Service.IServiceEntryProvider _entryProvider;
 
-        public RequestHandler(IServiceExecutor executor, Service.IServiceProvider entryProvider)
+        public RequestHandler(IServiceExecutor executor, Service.IServiceEntryProvider entryProvider)
         {
             _executor = executor;
             _entryProvider = entryProvider;
@@ -28,7 +28,7 @@ namespace Ribe.Core
                 return;
             }
 
-            var method = entry.Methods.GetValueOrDefault(req.Header[Constants.ServiceMethodName]);
+            var method = entry.Methods.GetValueOrDefault(req.Header[Constants.MethodName]);
             if (method == null)
             {
                 await reqCallBack(req.RequestId, Response.Create(null, "service method not found!", Status.MethodNotFound));

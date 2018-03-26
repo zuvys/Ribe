@@ -1,16 +1,18 @@
-﻿using System;
+﻿using Ribe.Rpc.Routing.Registry;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace Ribe.Core.Service.Internals
 {
-    public class ServiceProvider : IServiceProvider
+    public class ServiceEntryProvider : IServiceEntryProvider
     {
-        protected ServiceEntryCache Cache { get; set; }
+        protected ServiceEntryCache Cache { get; }
 
-        protected IServiceFactory ServiceFacotry { get; set; }
+        protected IServiceFactory ServiceFacotry { get; }
 
-        public ServiceProvider(IServiceFactory serviceFactory)
+        public ServiceEntryProvider(IServiceFactory serviceFactory)
         {
             Cache = new ServiceEntryCache();
             ServiceFacotry = serviceFactory;
@@ -29,14 +31,22 @@ namespace Ribe.Core.Service.Internals
                 var entries = ServiceFacotry.CreateServices(item);
                 if (entries != null)
                 {
-                    entries.ForEach(i => Cache.AddOrUpdate(i));
+                    entries.ForEach(i =>
+                    {
+                        Cache.AddOrUpdate(i);
+                    });
                 }
             }
         }
 
         public ServiceEntry GetEntry(Request context)
         {
-            return Cache.Get(context.ServiceName);
+            return Cache.Get(context.ServicePath);
+        }
+
+        public IEnumerable<ServiceEntry> GetAll()
+        {
+            return Cache.GetAll();
         }
     }
 }

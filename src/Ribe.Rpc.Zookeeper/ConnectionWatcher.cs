@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Ribe.Rpc.Zookeeper
 {
-    public class KeepConnectionWatcher : Watcher
+    public class ConnectionWatcher : Watcher
     {
         public Action OnDisconncted { get; }
 
-        public KeepConnectionWatcher(Action onDisconnected)
+        public ConnectionWatcher(Action onDisconnected)
         {
             OnDisconncted = onDisconnected;
         }

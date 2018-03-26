@@ -17,7 +17,7 @@ namespace Client
                 .AddZookpeer(() => new ZkConfiguration()
                 {
                     Address = "127.0.0.1:2181",
-                    RootPath = "services/test",
+                    RootPath = "/services/test",
                     SessionTimeout = 1000 * 60,
                 }).BuildServiceProxyFacotry();
 

@@ -1,15 +1,15 @@
-﻿using Ribe.Rpc.Logging;
+﻿using org.apache.zookeeper;
+using Ribe.Rpc.Logging;
 using Ribe.Rpc.Routing;
 using Ribe.Rpc.Routing.Registry;
 using Ribe.Serialize;
 using System;
-using org.apache.zookeeper;
-using static org.apache.zookeeper.ZooDefs;
 using System.Linq;
+using static org.apache.zookeeper.ZooDefs;
 
 namespace Ribe.Rpc.Zookeeper.Registry
 {
-    public class ZkServiceRouteRegistrar : IServiceRouteRegistrar, IDisposable
+    public class ZkServiceRouteRegistrar : IRoutingEntryRegistrar, IDisposable
     {
         private ILogger _logger;
 
@@ -24,12 +24,28 @@ namespace Ribe.Rpc.Zookeeper.Registry
             _logger = logger;
             _zkConfiguration = zkConfiguration;
             _serializerProvider = serializerProvider;
+
+            if (string.IsNullOrEmpty(zkConfiguration.RootPath))
+            {
+                zkConfiguration.RootPath = string.Empty;
+            }
+
+            if (!zkConfiguration.RootPath.StartsWith("/"))
+            {
+                zkConfiguration.RootPath = "/" + zkConfiguration.RootPath;
+            }
+
+            if (zkConfiguration.RootPath.EndsWith("/"))
+            {
+                zkConfiguration.RootPath = zkConfiguration.RootPath.Remove(zkConfiguration.RootPath.Length - 1);
+            }
+
             CreateZkeeper();
         }
 
-        public void Register(ServiceRoutingEntry entry)
+        public void Register(RoutingEntry entry)
         {
-            var path = _zkConfiguration.RootPath + "/" + entry.ServiceName + "/host" + entry.Address;
+            var path = _zkConfiguration.RootPath + "/" + entry.ServicePath + "/" + entry.Address;
             var serializer = _serializerProvider.GetSerializer(Constants.Json);
             if (serializer == null)
             {
@@ -54,9 +70,9 @@ namespace Ribe.Rpc.Zookeeper.Registry
                 _logger.Error($"节点注册失败{path}");
         }
 
-        public void UnRegister(ServiceRoutingEntry entry)
+        public void UnRegister(RoutingEntry entry)
         {
-            var path = _zkConfiguration.RootPath + "/" + entry.ServiceName;
+            var path = _zkConfiguration.RootPath + "/" + entry.ServicePath;
 
             if (_zooKeeper.existsAsync(path, false).Result == null)
             {
@@ -86,7 +102,7 @@ namespace Ribe.Rpc.Zookeeper.Registry
                         nodePath,
                         null,
                         Ids.OPEN_ACL_UNSAFE,
-                        i == nodes[i].Length - 1 ? CreateMode.EPHEMERAL_SEQUENTIAL : CreateMode.PERSISTENT
+                        i == nodes.Length - 1 ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT
                     ).Wait();
 
                     if (_logger.IsEnabled(LogLevel.Info))
@@ -107,12 +123,12 @@ namespace Ribe.Rpc.Zookeeper.Registry
                 _zooKeeper.closeAsync().Wait();
             }
 
-            var kcWatcher = new KeepConnectionWatcher(() =>
+            var watcher = new ConnectionWatcher(() =>
             {
                 CreateZkeeper();
             });
 
-            _zooKeeper = new ZooKeeper(_zkConfiguration.Address, _zkConfiguration.SessionTimeout, kcWatcher);
+            _zooKeeper = new ZooKeeper(_zkConfiguration.Address, _zkConfiguration.SessionTimeout, watcher);
         }
 
         public void Dispose()

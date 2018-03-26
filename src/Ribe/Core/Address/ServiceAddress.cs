@@ -9,6 +9,17 @@ namespace Ribe.Core.Service.Address
 
         public string Ip { get; set; }
 
+        public ServiceAddress()
+        {
+
+        }
+
+        public ServiceAddress(string ip, int port)
+        {
+            Ip = ip;
+            Port = port;
+        }
+
         public EndPoint ToEndPoint()
         {
             if (!IPAddress.TryParse(Ip, out var address))

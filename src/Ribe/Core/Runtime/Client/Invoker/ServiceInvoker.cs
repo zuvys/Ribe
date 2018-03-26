@@ -11,25 +11,19 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
     /// </summary>
     public class ServiceInvoker : IServiceInvoker
     {
-        private IServiceClientFacotry _clientFactory;
+        private IServiceClient _client;
 
-        private IMessageFormatterManager _formatterProvider;
+        private IMessageFormatterManager _formatterManager;
 
-        public ServiceAddress Address { get; internal set; }
-
-        public ServiceInvoker(
-            IServiceClientFacotry clientFactory, 
-            IMessageFormatterManager formatterProvider
-        )
+        public ServiceInvoker(IServiceClient client, IMessageFormatterManager formatterManager)
         {
-            _clientFactory = clientFactory;
-            _formatterProvider = formatterProvider;
+            _client = client;
+            _formatterManager = formatterManager;
         }
 
         public async Task<object> InvokeAsync(RequestContext req)
         {
-            var client = _clientFactory.Create(Address);
-            var message = await client.SendRequestAsync(req);
+            var message = await _client.SendRequestAsync(req);
 
             if (req.IsVoidRequest)
             {
@@ -41,16 +35,16 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
                 throw new NullReferenceException(nameof(message));
             }
 
-            var convertor = _formatterProvider.GetFormatter(message);
-            if (convertor == null)
+            var formatter = _formatterManager.GetFormatter(message);
+            if (formatter == null)
             {
-                throw new NotSupportedException("not supported!");
+                throw new NotSupportedException("格式化响应消息失败!");
             }
 
-            var data = convertor.FormatResponse(message, req.ResponseValueType);
+            var data = formatter.FormatResponse(message, req.ResponseValueType);
             if (data == null)
             {
-                throw new RpcException("return value is null");
+                return req.IsAsyncRequest ? Task.FromResult<object>(null) : null;
             }
 
             if (!string.IsNullOrEmpty(data.Error))

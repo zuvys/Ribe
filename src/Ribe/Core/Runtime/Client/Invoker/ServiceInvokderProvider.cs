@@ -1,12 +1,8 @@
-﻿using Ribe.Core;
-using Ribe.Core.Service.Address;
+﻿using Ribe.Core.Service;
 using Ribe.Messaging;
-using Ribe.Rpc.Core.Runtime.Client.Selector;
 using Ribe.Rpc.Routing;
+using Ribe.Rpc.Routing.Balances;
 using Ribe.Rpc.Routing.Discovery;
-using Ribe.Rpc.Routing.Routers;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Ribe.Rpc.Core.Runtime.Client.Invoker
 {
@@ -14,39 +10,52 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
     {
         private IServiceClientFacotry _clientFacotry;
 
-        private IMessageFormatterManager _formatterProvider;
+        private IMessageFormatterManager _formatterManager;
 
-        private IServiceAddressSelector _selector;
+        private IRoutingEntrySelector _selector;
 
-        private IServiceRouteProvider _routeProvider;
+        private IRoutingEntryProvider _routeProvider;
+
+        private IRoutingManager _routerManager;
+
+        private IServicePathFacotry _servicePathFacotry;
 
         public ServiceInvokderProvider(
-            IServiceRouteProvider routeProvider,
+            IRoutingManager routerManager,
+            IRoutingEntryProvider routeProvider,
             IServiceClientFacotry clientFacotry,
-            IMessageFormatterManager formatterProvider
+            IServicePathFacotry servicePathFacotry,
+            IMessageFormatterManager formatterManager
         )
         {
+            _routerManager = routerManager;
             _routeProvider = routeProvider;
             _clientFacotry = clientFacotry;
-            _formatterProvider = formatterProvider;
-            _selector = new RandomServiceAddressSelector();
+            _formatterManager = formatterManager;
+            _servicePathFacotry = servicePathFacotry;
+            _selector = new RandRoutingEntrySelector();
         }
 
         public IServiceInvoker GetInvoker(RequestContext req)
         {
-            //var routes = new RouterManager(new List<IRouter> { new ServiceMethodRouter() })
-            //      .Route(_routeProvider.GetRoutes(req.Header[Constants.ServiceName]), req);
+            var routes = _routeProvider.GetRoutes(req.Header[Constants.ServiceName]);
+            var routedRoutes = _routerManager.Route(routes, req);
 
-            //var host = _selector.Select(routes.Select(i => i.Address).ToList(), req);
-
-            return new ServiceInvoker(_clientFacotry, _formatterProvider)
+            if (routedRoutes == null || routedRoutes.Count == 0)
             {
-                Address = new ServiceAddress
-                {
-                    Ip = "127.0.0.1",
-                    Port = 8080
-                }
-            };
+                //log
+            }
+
+            //AddRouteData To Generate Url
+            var selectedRoute = _selector.Select(routedRoutes, req);
+            if (selectedRoute != null)
+            {
+                req.Header[Constants.ServicePath] = _servicePathFacotry.CreatePath(req.ServiceType, selectedRoute.Descriptions);
+            }
+
+            System.Console.WriteLine(selectedRoute.Address);
+
+            return new ServiceInvoker(_clientFacotry.Create(selectedRoute.Address), _formatterManager);
         }
     }
 }

@@ -20,13 +20,13 @@ namespace Ribe.Rpc
     {
         public static IRpcServerBuilder AddRibeCore(this IRpcServerBuilder rpcBuilder)
         {
-            rpcBuilder.ServiceCollection.AddSingleton<IServiceNameFacotry, ServiceNameFactory>();
+            rpcBuilder.ServiceCollection.AddSingleton<IServicePathFacotry, ServicePathFactory>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceMethodNameFactory, ServiceMethodNameFactory>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceMethodNameMapFactory, ServiceMethodNameMapFacotry>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceActivator, ServiceActivator>();
             rpcBuilder.ServiceCollection.AddSingleton<IRequestHandler, RequestHandler>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceFactory, ServiceFactory>();
-            rpcBuilder.ServiceCollection.AddSingleton<IServiceProvider, Ribe.Core.Service.Internals.ServiceProvider>();
+            rpcBuilder.ServiceCollection.AddSingleton<IServiceEntryProvider, Ribe.Core.Service.Internals.ServiceEntryProvider>();
             rpcBuilder.ServiceCollection.AddSingleton<IObjectMethodExecutorProvider, ObjectMethodExecutorProvider>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceExecutor, ServiceExecutor>();
             rpcBuilder.ServiceCollection.AddSingleton<ISerializerManager, SerializerManager>();
@@ -43,8 +43,8 @@ namespace Ribe.Rpc
         {
             rpcBuilder.ServiceCollection.AddSingleton<IServiceProxyFactory, ServiceProxyFactory>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceInvokerProvider, ServiceInvokderProvider>();
-            rpcBuilder.ServiceCollection.AddSingleton<IRouterManager, RouterManager>();
-            rpcBuilder.ServiceCollection.AddSingleton<IServiceNameFacotry, ServiceNameFactory>();
+            rpcBuilder.ServiceCollection.AddSingleton<IRoutingManager, RoutingManager>();
+            rpcBuilder.ServiceCollection.AddSingleton<IServicePathFacotry, ServicePathFactory>();
             rpcBuilder.ServiceCollection.AddSingleton<IServiceMethodNameFactory, ServiceMethodNameFactory>();
             rpcBuilder.ServiceCollection.AddSingleton<ISerializerManager, SerializerManager>();
             rpcBuilder.ServiceCollection.AddSingleton<IMessageFormatterManager, MessageFormatterManager>();

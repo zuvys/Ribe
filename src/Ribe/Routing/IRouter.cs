@@ -5,6 +5,6 @@ namespace Ribe.Rpc.Routing
 {
     public interface IRouter
     {
-        List<ServiceRoutingEntry> Route(List<ServiceRoutingEntry> routes, RequestContext req);
+        List<RoutingEntry> Route(List<RoutingEntry> routes, RequestContext req);
     }
 }

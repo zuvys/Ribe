@@ -11,9 +11,9 @@ namespace Ribe.Core
 
         public Header Header { get; }
 
-        public string ServiceName => Header.GetValueOrDefault(Constants.ServiceName);
+        public string ServicePath => Header.GetValueOrDefault(Constants.ServicePath);
 
-        public string ServiceMethodKey => Header.GetValueOrDefault(Constants.ServiceMethodName);
+        public string ServiceMethodName => Header.GetValueOrDefault(Constants.MethodName);
 
         public Func<Type[], object[]> ParamterValuesProvider { get; }
 

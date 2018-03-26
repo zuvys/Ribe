@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Ribe.Core
 {
@@ -12,9 +13,13 @@ namespace Ribe.Core
 
         public string Version { get; set; } = Constants.DefaultVersion;
 
-        public ServiceAttribute()
+        public Dictionary<string, string> GetDescriptions()
         {
-
+            return new Dictionary<string, string>
+            {
+                [Constants.Group] = Group,
+                [Constants.Version] = Version
+            };
         }
     }
 }

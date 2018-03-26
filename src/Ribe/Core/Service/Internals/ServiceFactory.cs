@@ -9,12 +9,12 @@ namespace Ribe.Core.Service.Internals
     {
         private IServiceMethodNameMapFactory _methodNameMapFactory;
 
-        private IServiceNameFacotry _serviceNameFacotry;
+        private IServicePathFacotry _serviceNameFacotry;
 
         private ILogger _logger;
 
         public ServiceFactory(
-            IServiceNameFacotry serviceNameFacotry,
+            IServicePathFacotry serviceNameFacotry,
             IServiceMethodNameMapFactory methodNameMapFactory,
             ILogger logger)
         {
@@ -41,13 +41,14 @@ namespace Ribe.Core.Service.Internals
                     continue;
                 }
 
-                var serviceName = _serviceNameFacotry.CreateName(def, attr);
+                var serviceName = _serviceNameFacotry.CreatePath(def, attr);
                 var serviceEntry = new ServiceEntry()
                 {
                     Attribute = attr,
                     ServiceType = serviceType,
                     Methods = map,
-                    ServiceName = _serviceNameFacotry.CreateName(def, attr)
+                    ServicePath = _serviceNameFacotry.CreatePath(def, attr),
+                    ServiceName = def.Namespace + "." + def.Name
                 };
 
                 serviceEntries.Add(serviceEntry);

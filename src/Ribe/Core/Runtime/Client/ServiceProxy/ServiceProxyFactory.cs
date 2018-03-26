@@ -27,7 +27,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 
         private IServiceInvokerProvider _invokerProvider;
 
-        private IServiceNameFacotry _serviceNameFacotry;
+        private IServicePathFacotry _serviceNameFacotry;
 
         static ServiceProxyFactory()
         {
@@ -41,7 +41,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
         /// </summary>
         public ServiceProxyFactory(
             IServiceInvokerProvider invokerProvider,
-            IServiceNameFacotry serviceNameFacotry,
+            IServicePathFacotry serviceNameFacotry,
             IServiceMethodNameFactory serviceMethodNameFactory
         )
         {
@@ -66,7 +66,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
                     typeof(ServiceProxyBase),
                     new[] { serviceType });
 
-                var ctorTypes = new[] { typeof(IServiceInvokerProvider), typeof(IServiceNameFacotry) };
+                var ctorTypes = new[] { typeof(IServiceInvokerProvider), typeof(IServicePathFacotry) };
                 var ctorBudiler = typeBudiler.DefineConstructor(
                     MethodAttributes.Public,
                     CallingConventions.HasThis,
@@ -114,7 +114,7 @@ namespace Ribe.Rpc.Core.Runtime.Client.ServiceProxy
 
                     if (item.ReturnType == typeof(void))
                     {
-                        il.Emit(OpCodes.Call, ServiceProxyBase.InvokeServiceVoidMethod);
+                        il.Emit(OpCodes.Call, ServiceProxyBase.InvokeVoidServiceMethod);
                     }
                     else
                     {

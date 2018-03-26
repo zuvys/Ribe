@@ -22,7 +22,7 @@ namespace Ribe.Rpc
 
     public class RpcClientBuilder : IRpcClientBuilder
     {
-        protected IServiceProvider ServiceProvider { get; set; }
+        public IServiceProvider ServiceProvider { get; set; }
 
         public IServiceCollection ServiceCollection { get; }
 
@@ -45,7 +45,7 @@ namespace Ribe.Rpc
 
     public class RpcServerBuilder : IRpcServerBuilder
     {
-        protected IServiceProvider ServiceProvider { get; set; }
+        public IServiceProvider ServiceProvider { get; set; }
 
         public IServiceCollection ServiceCollection { get; }
 

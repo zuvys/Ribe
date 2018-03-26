@@ -5,8 +5,6 @@ namespace Ribe.Rpc.Core.Runtime.Client.Invoker
 {
     public interface IServiceInvoker
     {
-        ServiceAddress Address { get; }
-
         Task<object> InvokeAsync(RequestContext req);
     }
 }

@@ -6,25 +6,27 @@ using Ribe.Rpc.Routing.Routers;
 
 namespace Ribe.Rpc.Routing
 {
-    public class RouterManager : IRouterManager
+    public class RoutingManager : IRoutingManager
     {
         private ConcurrentDictionary<Type, IRouter> _routers;
 
-        public RouterManager()
+        public RoutingManager()
         {
             _routers = new ConcurrentDictionary<Type, IRouter>();
 
             AddRouter(new ServiceMethodRouter());
+            AddRouter(new ServiceVersionRouter());
+            AddRouter(new ServiceGroupRouter());
         }
 
-        public List<ServiceRoutingEntry> Route(List<ServiceRoutingEntry> routeEntries, RequestContext req)
+        public List<RoutingEntry> Route(List<RoutingEntry> entries, RequestContext req)
         {
             foreach (var router in _routers.Values)
             {
-                routeEntries = router.Route(routeEntries, req);
+                entries = router.Route(entries, req);
             }
 
-            return routeEntries;
+            return entries;
         }
 
         public void AddRouter(IRouter router)

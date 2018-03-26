@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Ribe.Core.Service
 {
@@ -13,17 +14,22 @@ namespace Ribe.Core.Service
 
         public void AddOrUpdate(ServiceEntry service)
         {
-            Services.AddOrUpdate(service.ServiceName, service, (k, v) => service);
+            Services.AddOrUpdate(service.ServicePath, service, (k, v) => service);
         }
 
-        public ServiceEntry Get(string serviceName)
+        public ServiceEntry Get(string servicePath)
         {
-            return Services.TryGetValue(serviceName, out var service) ? service :null ;
+            return Services.TryGetValue(servicePath, out var service) ? service : null;
+        }
+
+        public IEnumerable<ServiceEntry> GetAll()
+        {
+            return Services.Values;
         }
 
         public bool Remove(ServiceEntry service)
         {
-            return Services.TryRemove(service.ServiceName, out service);
+            return Services.TryRemove(service.ServicePath, out service);
         }
     }
 }
