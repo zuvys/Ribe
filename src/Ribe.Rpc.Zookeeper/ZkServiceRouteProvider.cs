@@ -1,8 +1,7 @@
 ﻿using org.apache.zookeeper;
 using Ribe.Rpc.Logging;
-using Ribe.Rpc.Routing;
-using Ribe.Rpc.Routing.Discovery;
-using Ribe.Serialize;
+using Ribe.Rpc.Runtime.Client.Routing;
+using Ribe.Rpc.Serialize;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

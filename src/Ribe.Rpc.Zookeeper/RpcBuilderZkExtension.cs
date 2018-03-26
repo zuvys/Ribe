@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Ribe.Rpc.Logging;
-using Ribe.Rpc.Routing.Discovery;
-using Ribe.Rpc.Routing.Registry;
+using Ribe.Rpc.Runtime.Client.Routing;
+using Ribe.Rpc.Runtime.Client.Routing.Registry;
+using Ribe.Rpc.Serialize;
 using Ribe.Rpc.Zookeeper.Discovery;
 using Ribe.Rpc.Zookeeper.Registry;
-using Ribe.Serialize;
 using System;
 
 namespace Ribe.Rpc.Zookeeper

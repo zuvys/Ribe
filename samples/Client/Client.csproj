@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ribe.DotNetty\Ribe.Rpc.DotNetty.csproj" />
-    <ProjectReference Include="..\..\src\Ribe.Json\Ribe.Rpc.Json.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.Rpc.DotNetty\Ribe.Rpc.DotNetty.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.Rpc.Json\Ribe.Rpc.Json.csproj" />
     <ProjectReference Include="..\..\src\Ribe.Rpc.Zookeeper\Ribe.Rpc.Zookeeper.csproj" />
-    <ProjectReference Include="..\..\src\Ribe\Ribe.Rpc.csproj" />
+    <ProjectReference Include="..\..\src\Ribe.Rpc\Ribe.Rpc.csproj" />
     <ProjectReference Include="..\ServiceInterfaces\ServiceInterfaces.csproj" />
   </ItemGroup>
 

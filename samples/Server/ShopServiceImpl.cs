@@ -1,4 +1,4 @@
-﻿using Ribe.Core;
+﻿using Ribe.Rpc;
 using ServiceInterfaces;
 using System.Threading.Tasks;
 

@@ -27,3 +27,10 @@
 /src/Ribe.Server/obj
 /src/Ribe.Rpc.Zookeeper/bin/Debug/netcoreapp2.0
 /src/Ribe.Rpc.Zookeeper/obj
+/src/Ribe.Rpc.Json/obj
+/src/Ribe.Rpc.Json/bin/Debug/netcoreapp2.0
+/src/Ribe.Rpc.DotNetty/obj/Release/netcoreapp2.0
+/src/Ribe.Rpc.DotNetty/obj
+/src/Ribe.Rpc.DotNetty/bin/Debug/netcoreapp2.0
+/src/Ribe.Rpc/obj
+/src/Ribe.Rpc/bin/Debug/netcoreapp2.0
