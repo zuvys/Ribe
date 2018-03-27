@@ -14,7 +14,7 @@ namespace Ribe.Rpc.Runtime.Client.Routing.Routers
 
             foreach (var route in routes)
             {
-                var names = route.Descriptions.GetValueOrDefault(Constants.MethodName, string.Empty);
+                var names = route.RouteData.GetValueOrDefault(Constants.MethodName, string.Empty);
                 if (string.IsNullOrEmpty(names))
                 {
                     routedEntries.Add(route);

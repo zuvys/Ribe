@@ -13,7 +13,7 @@ namespace Ribe.Rpc
 
         public string Version { get; set; } = Constants.DefaultVersion;
 
-        public Dictionary<string, string> GetDescriptions()
+        public Dictionary<string, string> GetRouteData()
         {
             return new Dictionary<string, string>
             {

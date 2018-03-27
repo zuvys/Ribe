@@ -16,7 +16,7 @@ namespace Ribe.Rpc.DotNetty.Core.Runtime.Server
 
         public Task SendAsync(Message message)
         {
-            return _context.WriteAsync(message);
+            return _context.WriteAndFlushAsync(message);
         }
     }
 }

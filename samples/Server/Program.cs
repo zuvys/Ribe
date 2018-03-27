@@ -19,19 +19,11 @@ namespace Client
         static void Main(string[] args)
         {
             var rpc = new RpcServerBuilder((p) => p.UseJson());
-            var rnd = new Random(DateTime.Now.Millisecond);
-            var port1 = rnd.Next(2000, 10000);
-            var port2 = rnd.Next(2000, 10000);
 
             var factory = rpc
                 .AddRibeCore()
                 .AddDotNetty()
-                .AddZookpeer(() => new ZkConfiguration()
-                {
-                    Address = "127.0.0.1:2181",
-                    RootPath = "/services/test",
-                    SessionTimeout = 1000 * 60
-                }).BuildServiceHostFacotry();
+                .BuildServiceHostFacotry();
 
 
             var ipEntry = Dns.GetHostEntry(Dns.GetHostName());
@@ -46,38 +38,9 @@ namespace Client
                 }
             }
 
-            var entries = rpc.ServiceProvider.GetRequiredService<IServiceEntryProvider>().GetAll();
-            var registrar = rpc.ServiceProvider.GetRequiredService<IRoutingEntryRegistrar>();
+            factory.Create(8080).StartAsync().Wait();
 
-            entries
-                .ToList()
-                .Select(item => new RoutingEntry()
-                {
-                    Address = new ServiceAddress(ip, port1),
-                    ServicePath = item.ServicePath,
-                    ServiceName = item.ServiceName,
-                    Descriptions = item.Attribute.GetDescriptions()
-                })
-                .ToList()
-                .ForEach(item => registrar.Register(item));
-
-            entries
-                .ToList()
-                .Select(item => new RoutingEntry()
-                {
-                    Address = new ServiceAddress(ip, port2),
-                    ServicePath = item.ServicePath,
-                    ServiceName = item.ServiceName,
-                    Descriptions = item.Attribute.GetDescriptions()
-                })
-                .ToList()
-                .ForEach(item => registrar.Register(item));
-
-            factory.Create(port1).StartAsync().Wait();
-            factory.Create(port2).StartAsync().Wait();
-
-            Console.WriteLine("Port:" + port1);
-            Console.WriteLine("Port:" + port2);
+            Console.WriteLine("Port:" + 8080);
 
             Console.ReadLine();
         }

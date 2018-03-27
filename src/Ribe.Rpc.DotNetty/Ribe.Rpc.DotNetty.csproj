@@ -6,6 +6,14 @@
     <AssemblyName>Ribe.DotNetty</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="DotNetty.Buffers" Version="0.4.7" />
     <PackageReference Include="DotNetty.Codecs" Version="0.4.7" />

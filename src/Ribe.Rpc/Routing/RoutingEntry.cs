@@ -1,4 +1,5 @@
 ﻿using Ribe.Rpc.Core.Service.Address;
+
 using System.Collections.Generic;
 
 namespace Ribe.Rpc.Runtime.Client.Routing
@@ -23,11 +24,11 @@ namespace Ribe.Rpc.Runtime.Client.Routing
         /// <summary>
         /// 服务描述
         /// </summary>
-        public Dictionary<string, string> Descriptions { get; set; }
+        public Dictionary<string, string> RouteData { get; set; }
 
         public RoutingEntry()
         {
-            Descriptions = new Dictionary<string, string>();
+            RouteData = new Dictionary<string, string>();
         }
     }
 }

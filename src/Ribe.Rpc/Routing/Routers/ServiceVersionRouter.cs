@@ -2,7 +2,7 @@
 
 namespace Ribe.Rpc.Runtime.Client.Routing.Routers
 {
-    public class ServiceGroupRouter : IRouter
+    public class ServiceVersionRouter : IRouter
     {
         public List<RoutingEntry> Route(List<RoutingEntry> entries, Invocation req)
         {
@@ -11,11 +11,16 @@ namespace Ribe.Rpc.Runtime.Client.Routing.Routers
                 return entries;
             }
 
+            if (!req.Header.ContainsKey(Constants.Version))
+            {
+                return entries;
+            }
+
             var routedEntries = new List<RoutingEntry>();
 
             foreach (var entry in entries)
             {
-                if (entry.Descriptions.GetValueOrDefault(Constants.Group) == req.Header.GetValueOrDefault(Constants.Group))
+                if (entry.RouteData.GetValueOrDefault(Constants.Version) == req.Header.GetValueOrDefault(Constants.Version))
                 {
                     routedEntries.Add(entry);
                 }

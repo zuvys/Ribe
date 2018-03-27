@@ -21,36 +21,39 @@ namespace Ribe.Rpc.Runtime.Client.Invoker
 
         public async Task<object> InvokeAsync(Invocation req)
         {
-            var message = await _client.SendRequestAsync(req);
-
-            if (req.IsVoid)
+            using (_client)
             {
-                return req.IsAsync ? Task.CompletedTask : null;
-            }
+                var message = await _client.SendRequestAsync(req);
 
-            if (message == null)
-            {
-                throw new NullReferenceException(nameof(message));
-            }
+                if (req.IsVoid)
+                {
+                    return req.IsAsync ? Task.CompletedTask : null;
+                }
 
-            var formatter = _formatterManager.GetFormatter(message);
-            if (formatter == null)
-            {
-                throw new NotSupportedException("格式化响应消息失败!");
-            }
+                if (message == null)
+                {
+                    throw new NullReferenceException(nameof(message));
+                }
 
-            var data = formatter.FormatResponse(message, req.ValueType);
-            if (data == null)
-            {
-                return req.IsAsync ? Task.FromResult<object>(null) : null;
-            }
+                var formatter = _formatterManager.GetFormatter(message);
+                if (formatter == null)
+                {
+                    throw new NotSupportedException("格式化响应消息失败!");
+                }
 
-            if (!string.IsNullOrEmpty(data.Error))
-            {
-                throw new RpcException(data.Error);
-            }
+                var data = formatter.FormatResponse(message, req.ValueType);
+                if (data == null)
+                {
+                    return req.IsAsync ? Task.FromResult<object>(null) : null;
+                }
 
-            return req.IsAsync ? Task.FromResult(data.Data) : data.Data;
+                if (!string.IsNullOrEmpty(data.Error))
+                {
+                    throw new RpcException(data.Error);
+                }
+
+                return req.IsAsync ? Task.FromResult(data.Data) : data.Data;
+            }
         }
     }
 }

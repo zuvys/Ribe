@@ -1,5 +1,6 @@
 ﻿using Ribe.Rpc.Core;
 using Ribe.Rpc.Core.Service;
+using Ribe.Rpc.Core.Service.Address;
 using Ribe.Rpc.Runtime.Client.Invoker;
 using System;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace Ribe.Rpc.Runtime.Client.ServiceProxy
     public abstract class ServiceProxyBase
     {
         public Header Header { get; }
+
+        public ServiceAddress Address { get; set; }
 
         protected Type ServiceType { get; }
 
@@ -47,7 +50,10 @@ namespace Ribe.Rpc.Runtime.Client.ServiceProxy
         protected object InvokeService(string method, Type valueType, object[] paramterValues)
         {
             var header = GetRequestHeader(method);
-            var req = new Invocation(header, ServiceType, paramterValues, valueType);
+            var req = new Invocation(header, ServiceType, paramterValues, valueType)
+            {
+                Address = Address
+            };
 
             var invoker = ServiceInvokerProvider.GetInvoker(req);
             if (invoker == null)

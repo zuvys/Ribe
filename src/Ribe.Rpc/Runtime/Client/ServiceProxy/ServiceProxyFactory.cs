@@ -1,4 +1,5 @@
 ﻿using Ribe.Rpc.Core.Service;
+using Ribe.Rpc.Core.Service.Address;
 using Ribe.Rpc.Runtime.Client.Invoker;
 using System;
 using System.Collections.Concurrent;
@@ -127,6 +128,17 @@ namespace Ribe.Rpc.Runtime.Client.ServiceProxy
             });
 
             return (TService)Activator.CreateInstance(proxy, _invokerProvider, _serviceNameFacotry);
+        }
+
+        public TService CreateProxy<TService>(ServiceAddress addr)
+        {
+            var proxy = CreateProxy<TService>();
+            if (proxy is ServiceProxyBase proxyBase)
+            {
+                proxyBase.Address = addr;
+            }
+
+            return proxy;
         }
     }
 }

@@ -4,6 +4,7 @@ using Ribe.Rpc.DotNetty.Core.Runtime.Server;
 using Ribe.Rpc.Messaging;
 using Ribe.Rpc.Serialize;
 using Ribe.Rpc.Transport;
+using System;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ namespace Ribe.DotNetty.Adapter
             _serializerProvider = serializerProvider;
         }
 
-        static int i;
+        public static long i;
 
         public override void ChannelRead(IChannelHandlerContext context, object obj)
         {
@@ -33,10 +34,8 @@ namespace Ribe.DotNetty.Adapter
             i++;
             if (i % 1000 == 0)
             {
-                System.Console.WriteLine("handled connection count:" + i);
+                Console.WriteLine("i:" + i );
             }
-
-            System.Console.WriteLine(((IPEndPoint)context.Channel.LocalAddress).Port);
 
             Task.Run(async () =>
             {
@@ -52,8 +51,6 @@ namespace Ribe.DotNetty.Adapter
                         )
                     );
                 });
-
-                await context.CloseAsync();
             });
         }
     }

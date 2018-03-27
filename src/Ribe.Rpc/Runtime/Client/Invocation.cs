@@ -1,4 +1,5 @@
 ﻿using Ribe.Rpc.Core;
+using Ribe.Rpc.Core.Service.Address;
 using System;
 using System.Threading.Tasks;
 
@@ -17,6 +18,8 @@ namespace Ribe.Rpc.Runtime.Client
         public Type ServiceType { get; }
 
         public object[] ParamterValues { get; }
+
+        public ServiceAddress Address { get; set; }
 
         public Invocation(Header header, Type serviceType, object[] paramterValues, Type responseValueType)
         {
